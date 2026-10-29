@@ -31,7 +31,7 @@ class UpdateService {
   static const String githubApiUrl =
       "https://api.github.com/repos/$repoOwner/$repoName/releases/latest";
   static const String fallbackReleaseUrl =
-      "https://github.com/$repoOwner/$repoName/releases/latest";
+      "https://github.com/$repoOwner/$repoName/releases";
 
   static const MethodChannel _installerChannel =
       MethodChannel("com.rohannet.symphonymusic/installer");
@@ -228,8 +228,20 @@ class UpdateService {
   /// Open release page in web browser
   static Future<void> openReleasePage([String? url]) async {
     final target = Uri.parse(url ?? fallbackReleaseUrl);
-    if (await canLaunchUrl(target)) {
-      await launchUrl(target, mode: LaunchMode.externalApplication);
+    try {
+      final launched = await launchUrl(
+        target,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        await launchUrl(target, mode: LaunchMode.platformDefault);
+      }
+    } catch (_) {
+      try {
+        await launchUrl(target, mode: LaunchMode.platformDefault);
+      } catch (e) {
+        printERROR("Could not open browser URL: $e");
+      }
     }
   }
 
