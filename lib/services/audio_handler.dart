@@ -278,6 +278,9 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
 
   AudioSource _createAudioSource(MediaItem mediaItem) {
     final url = mediaItem.extras!['url'] as String;
+    final headers = url.contains("googlevideo.com")
+        ? {'User-Agent': 'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip'}
+        : null;
     if (url.contains('/cache') ||
         (Get.find<SettingsScreenController>().cacheSongs.isTrue &&
             url.contains("http"))) {
@@ -287,6 +290,7 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
         Uri.parse(url),
         cacheFile: File("$_cacheDir/cachedSongs/${mediaItem.id}.mp3"),
         tag: mediaItem,
+        headers: headers,
       );
     }
 
@@ -294,6 +298,7 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
     isPlayingUsingLockCachingSource = false;
     return AudioSource.uri(
       Uri.tryParse(url)!,
+      headers: headers,
       tag: mediaItem,
     );
   }

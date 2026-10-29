@@ -157,23 +157,25 @@ class Downloader extends GetxService {
     final settingsScreenController = Get.find<SettingsScreenController>();
     final downloadingFormat = settingsScreenController.downloadingFormat.string;
 
-    final yt = yt_expl.YoutubeExplode();
+    yt_expl.YoutubeExplode? yt;
     try {
-      final manifest = await yt.videos.streamsClient.getManifest(song.id);
-      final audioStreams = manifest.audioOnly;
-      if (audioStreams.isEmpty) {
-        throw Exception("No audio streams found");
+      final streamProvider = await StreamProvider.fetch(song.id);
+      if (!streamProvider.playable ||
+          streamProvider.audioFormats == null ||
+          streamProvider.audioFormats!.isEmpty) {
+        throw Exception(streamProvider.statusMSG.isNotEmpty
+            ? streamProvider.statusMSG
+            : "No audio streams found");
       }
 
-      final requiredStream = downloadingFormat == "opus"
-          ? audioStreams.lastWhere((item) => item.tag == 251 || item.tag == 250,
-              orElse: () => audioStreams.first)
-          : audioStreams.lastWhere((item) => item.tag == 140 || item.tag == 139,
-              orElse: () => audioStreams.first);
+      final audioStreams = streamProvider.audioFormats!;
+      final requiredAudio = downloadingFormat == "opus"
+          ? (streamProvider.highestBitrateOpusAudio ?? audioStreams.first)
+          : (streamProvider.highestBitrateMp4aAudio ?? audioStreams.first);
 
       final dirPath = settingsScreenController.downloadLocationPath.string;
       final actualDownformat =
-          requiredStream.audioCodec.contains("mp") ? "m4a" : "opus";
+          requiredAudio.audioCodec == Codec.mp4a ? "m4a" : "opus";
       final RegExp invalidChar =
           RegExp(r'Container.|\/|\\|\"|\<|\>|\*|\?|\:|\!|\[|\]|\¡|\||\%');
       final songTitle = "${song.title.trim()} (${song.artist?.trim()})"
@@ -183,20 +185,54 @@ class Downloader extends GetxService {
 
       final file = File(filePath);
       final output = file.openWrite(mode: FileMode.writeOnly);
-      final stream = yt.videos.streamsClient.get(requiredStream);
 
       int count = 0;
-      final total = requiredStream.size.totalBytes;
+      final total = requiredAudio.size;
 
-      await for (final data in stream) {
-        count += data.length;
-        output.add(data);
-        if (total > 0) {
-          songDownloadingProgress.value = ((count / total) * 100).toInt();
+      final client = HttpClient();
+      try {
+        final uri = Uri.parse(requiredAudio.url);
+        final request = await client.getUrl(uri);
+        request.headers.set('User-Agent',
+            'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip');
+        final response = await request.close();
+        if (response.statusCode == 200 || response.statusCode == 206) {
+          await for (final data in response) {
+            count += data.length;
+            output.add(data);
+            if (total > 0) {
+              songDownloadingProgress.value =
+                  ((count / total) * 100).toInt();
+            }
+          }
+        } else {
+          // Fallback to youtube_explode stream if available
+          yt = yt_expl.YoutubeExplode();
+          final manifest = await yt.videos.streamsClient.getManifest(song.id);
+          final ytStreams = manifest.audioOnly;
+          final ytRequired = downloadingFormat == "opus"
+              ? ytStreams.lastWhere(
+                  (item) => item.tag == 251 || item.tag == 250,
+                  orElse: () => ytStreams.first)
+              : ytStreams.lastWhere(
+                  (item) => item.tag == 140 || item.tag == 139,
+                  orElse: () => ytStreams.first);
+          final stream = yt.videos.streamsClient.get(ytRequired);
+          final ytTotal = ytRequired.size.totalBytes;
+          await for (final data in stream) {
+            count += data.length;
+            output.add(data);
+            if (ytTotal > 0) {
+              songDownloadingProgress.value =
+                  ((count / ytTotal) * 100).toInt();
+            }
+          }
         }
+      } finally {
+        await output.flush();
+        await output.close();
+        client.close();
       }
-      await output.flush();
-      await output.close();
 
       String? year;
       try {
@@ -222,13 +258,13 @@ class Downloader extends GetxService {
       final songJson = MediaItemBuilder.toJson(song);
       
       final streamInfoJson = {
-        "itag": requiredStream.tag,
-        "audioCodec": requiredStream.audioCodec.contains("mp") ? "Codec.mp4a" : "Codec.opus",
-        "bitrate": requiredStream.bitrate.bitsPerSecond,
-        "loudnessDb": 0.0,
+        "itag": requiredAudio.itag,
+        "audioCodec": requiredAudio.audioCodec == Codec.mp4a ? "Codec.mp4a" : "Codec.opus",
+        "bitrate": requiredAudio.bitrate,
+        "loudnessDb": requiredAudio.loudnessDb,
         "url": filePath,
-        "approxDurationMs": song.duration?.inMilliseconds ?? 0,
-        "size": requiredStream.size.totalBytes
+        "approxDurationMs": song.duration?.inMilliseconds ?? requiredAudio.duration,
+        "size": count > 0 ? count : requiredAudio.size
       };
       
       songJson["streamInfo"] = [true, streamInfoJson];
@@ -281,7 +317,7 @@ class Downloader extends GetxService {
       printINFO("Downloading failed due to error: $error\n$stackTrace");
       complete.complete();
     } finally {
-      yt.close();
+      yt?.close();
     }
 
     return complete.future;
