@@ -51,9 +51,9 @@ class UpdateService {
   static Future<String> getCurrentAppVersion() async {
     try {
       final info = await PackageInfo.fromPlatform();
-      return info.version.isNotEmpty ? info.version : "1.12.5";
+      return info.version.isNotEmpty ? info.version : "1.12.6";
     } catch (_) {
-      return "1.12.5";
+      return "1.12.6";
     }
   }
 

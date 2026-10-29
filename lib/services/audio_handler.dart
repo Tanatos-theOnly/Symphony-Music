@@ -65,9 +65,6 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
   // list of shuffled queue songs ids
   List<String> shuffledQueue = [];
 
-  final _playList =
-      ConcatenatingAudioSource(children: [], useLazyPreparation: false);
-
   MyAudioHandler() {
     if (GetPlatform.isWindows || GetPlatform.isLinux) {
       JustAudioMediaKit.title = 'Symphony Music';
@@ -77,13 +74,12 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
     _player = AudioPlayer(
         audioLoadConfiguration: const AudioLoadConfiguration(
             androidLoadControl: AndroidLoadControl(
-      minBufferDuration: Duration(seconds: 50),
-      maxBufferDuration: Duration(seconds: 120),
-      bufferForPlaybackDuration: Duration(milliseconds: 50),
+      minBufferDuration: Duration(seconds: 15),
+      maxBufferDuration: Duration(seconds: 60),
+      bufferForPlaybackDuration: Duration(milliseconds: 500),
       bufferForPlaybackAfterRebufferDuration: Duration(seconds: 2),
     )));
     _createCacheDir();
-    _addEmptyList();
     _notifyAudioHandlerAboutPlaybackEvents();
     _listenToPlaybackForNextSong();
     _listenForSequenceStateChanges();
@@ -106,14 +102,6 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
     _cacheDir = (await getTemporaryDirectory()).path;
     if (!Directory("$_cacheDir/cachedSongs/").existsSync()) {
       Directory("$_cacheDir/cachedSongs/").createSync(recursive: true);
-    }
-  }
-
-  void _addEmptyList() {
-    try {
-      _player.setAudioSource(_playList);
-    } catch (r) {
-      printERROR(r.toString());
     }
   }
 
@@ -182,7 +170,6 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
         _playbackRetryCount++;
         printINFO("Retrying playback (attempt $_playbackRetryCount)...");
         customAction("playByIndex", {'index': currentIndex, 'newUrl': true});
-        await _player.seek(curPos, index: 0);
       } else {
         _playbackRetryCount = 0;
         isSongLoading = false;
@@ -525,9 +512,6 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
         isSongLoading = true;
         playbackState.add(playbackState.value
             .copyWith(processingState: AudioProcessingState.loading));
-        if (_playList.children.isNotEmpty) {
-          await _playList.clear();
-        }
 
         mediaItem.add(currentSong);
         final streamInfo = await futureStreamInfo;
@@ -546,7 +530,10 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
         currentSongUrl = currentSong.extras!['url'] = streamInfo.audio!.url;
         playbackState
             .add(playbackState.value.copyWith(queueIndex: currentIndex));
-        await _playList.add(_createAudioSource(currentSong));
+        await _player.setAudioSource(
+          _createAudioSource(currentSong),
+          preload: true,
+        );
 
         isSongLoading = false;
         if (loudnessNormalizationEnabled && GetPlatform.isAndroid) {
@@ -556,12 +543,6 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
         if (restoreSession) {
           if (!GetPlatform.isDesktop) {
             final position = extras['position'];
-            await _player.load();
-            await _player.seek(
-              Duration(
-                milliseconds: position,
-              ),
-            );
             await _player.seek(
               Duration(
                 milliseconds: position,
@@ -611,7 +592,6 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
         final futureStreamInfo = checkNGetUrl(currMed.id);
         isSongLoading = true;
         currentIndex = 0;
-        await _playList.clear();
         mediaItem.add(currMed);
         queue.add([currMed]);
         final streamInfo = (await futureStreamInfo);
@@ -625,7 +605,10 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
         }
         currentSongUrl = currMed.extras!['url'] = streamInfo.audio!.url;
 
-        await _playList.add(_createAudioSource(currMed));
+        await _player.setAudioSource(
+          _createAudioSource(currMed),
+          preload: true,
+        );
         isSongLoading = false;
 
         // Normalize audio
@@ -918,8 +901,10 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
 
       if (streamInfo == null) {
         final token = RootIsolateToken.instance;
+        final visitorData =
+            Hive.box('AppPrefs').get('visitorId')?['id']?.toString();
         final streamInfoJson =
-            await Isolate.run(() => getStreamInfo(songId, token));
+            await Isolate.run(() => getStreamInfo(songId, token, visitorData));
         streamInfo = HMStreamingData.fromJson(streamInfoJson);
         if (streamInfo.playable) songsUrlCacheBox.put(songId, streamInfoJson);
       }

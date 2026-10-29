@@ -9,6 +9,49 @@ class StreamProvider {
   StreamProvider(
       {required this.playable, this.audioFormats, this.statusMSG = ""});
 
+  static String? _cachedVisitorData;
+
+  static Future<String> _getVisitorData([String? passedVisitorData]) async {
+    if (passedVisitorData != null && passedVisitorData.isNotEmpty) {
+      _cachedVisitorData = passedVisitorData;
+      return passedVisitorData;
+    }
+    if (_cachedVisitorData != null && _cachedVisitorData!.isNotEmpty) {
+      return _cachedVisitorData!;
+    }
+
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+    try {
+      final req = await client
+          .getUrl(Uri.parse('https://music.youtube.com'))
+          .timeout(const Duration(seconds: 4));
+      req.headers.set(
+          'User-Agent',
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36');
+      final resp = await req.close().timeout(const Duration(seconds: 4));
+      if (resp.statusCode == 200) {
+        final body = await resp.transform(utf8.decoder).join();
+        final match =
+            RegExp(r'ytcfg\.set\s*\(\s*({.+?})\s*\)\s*;').firstMatch(body);
+        if (match != null) {
+          final json = jsonDecode(match.group(1)!);
+          final vd = json['VISITOR_DATA']?.toString();
+          if (vd != null && vd.isNotEmpty) {
+            _cachedVisitorData = vd;
+            return vd;
+          }
+        }
+      }
+    } catch (_) {
+    } finally {
+      client.close();
+    }
+
+    const fallback = "CgttN24wcmd5UzNSWSi2lvq2BjIKCgJKUBIEGgAgYQ%3D%3D";
+    _cachedVisitorData = fallback;
+    return fallback;
+  }
+
   static Future<Map<String, dynamic>?> _postInnertube(
     String url,
     Map<String, dynamic> body,
@@ -16,10 +59,13 @@ class StreamProvider {
   ) async {
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
     try {
-      final request = await client.postUrl(Uri.parse(url)).timeout(const Duration(seconds: 5));
+      final request = await client
+          .postUrl(Uri.parse(url))
+          .timeout(const Duration(seconds: 5));
       headers.forEach((k, v) => request.headers.set(k, v));
       request.write(jsonEncode(body));
-      final response = await request.close().timeout(const Duration(seconds: 5));
+      final response =
+          await request.close().timeout(const Duration(seconds: 5));
       final responseBody = await response.transform(utf8.decoder).join();
       if (response.statusCode == 200) {
         return jsonDecode(responseBody) as Map<String, dynamic>;
@@ -34,7 +80,9 @@ class StreamProvider {
 
   static List<Audio> _parseAudioFromStreamingData(Map<String, dynamic> data) {
     final formats = data['streamingData']?['adaptiveFormats'] as List? ?? [];
-    final loudness = (data['playerConfig']?['audioConfig']?['loudnessDb'] as num?)?.toDouble() ?? 0.0;
+    final loudness = (data['playerConfig']?['audioConfig']?['loudnessDb'] as num?)
+            ?.toDouble() ??
+        0.0;
     final audioList = <Audio>[];
 
     for (final f in formats) {
@@ -55,65 +103,12 @@ class StreamProvider {
     return audioList;
   }
 
-  static Future<StreamProvider?> _fetchInvidious(String videoId) async {
-    final instances = [
-      'https://inv.nadeko.net',
-      'https://invidious.nerdvpn.de',
-      'https://invidious.flokinet.to',
-      'https://iv.ggtyler.dev',
-      'https://invidious.no-valis.be',
-    ];
-
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
-    try {
-      for (final inst in instances) {
-        try {
-          final req = await client
-              .getUrl(Uri.parse('$inst/api/v1/videos/$videoId'))
-              .timeout(const Duration(seconds: 4));
-          final resp = await req.close().timeout(const Duration(seconds: 4));
-          if (resp.statusCode == 200) {
-            final body = await resp.transform(utf8.decoder).join();
-            final data = jsonDecode(body);
-            final adaptiveFormats = data['adaptiveFormats'] as List? ?? [];
-            final audioList = <Audio>[];
-            for (final f in adaptiveFormats) {
-              final type = f['type']?.toString() ?? '';
-              final url = f['url']?.toString();
-              if (type.contains('audio') && url != null && url.isNotEmpty) {
-                audioList.add(Audio(
-                  itag: int.tryParse(f['itag']?.toString() ?? '0') ?? 0,
-                  audioCodec: type.contains('mp4') ? Codec.mp4a : Codec.opus,
-                  bitrate: int.tryParse(f['bitrate']?.toString() ?? '0') ?? 0,
-                  duration: int.tryParse(f['approxDurationMs']?.toString() ?? '0') ?? 0,
-                  loudnessDb: 0.0,
-                  url: url,
-                  size: int.tryParse(f['clen']?.toString() ?? f['contentLength']?.toString() ?? '0') ?? 0,
-                ));
-              }
-            }
-            if (audioList.isNotEmpty) {
-              return StreamProvider(
-                playable: true,
-                statusMSG: "OK",
-                audioFormats: audioList,
-              );
-            }
-          }
-        } catch (_) {
-          continue;
-        }
-      }
-    } finally {
-      client.close();
-    }
-    return null;
-  }
-
-  static Future<StreamProvider> fetch(String videoId) async {
+  static Future<StreamProvider> fetch(String videoId,
+      {String? visitorData}) async {
+    final vData = await _getVisitorData(visitorData);
     String lastReason = "Song is unplayable";
 
-    // Tier 1: VISIONOS client (Echo-Music / Musify primary engine - whole-file capable without 403 throttling)
+    // Tier 1: VISIONOS client with visitorData (Echo-Music primary engine - whole-file capable without 403 throttling)
     try {
       final visionOsData = await _postInnertube(
         'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
@@ -128,6 +123,7 @@ class StreamProvider {
               'osVersion': '1.3.21O771',
               'hl': 'en',
               'gl': 'US',
+              'visitorData': vData,
             },
           },
           'videoId': videoId,
@@ -137,6 +133,7 @@ class StreamProvider {
               'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15',
           'X-Youtube-Client-Name': '101',
           'X-Youtube-Client-Version': '0.1',
+          'X-Goog-Visitor-Id': vData,
           'Content-Type': 'application/json',
         },
       );
@@ -163,7 +160,7 @@ class StreamProvider {
       }
     }
 
-    // Tier 2: ANDROID_VR client (Echo-Music secondary engine)
+    // Tier 2: ANDROID_VR client (Echo-Music secondary engine) with visitorData
     try {
       final vrData = await _postInnertube(
         'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
@@ -179,6 +176,7 @@ class StreamProvider {
               'androidSdkVersion': '32',
               'hl': 'en',
               'gl': 'US',
+              'visitorData': vData,
             },
           },
           'videoId': videoId,
@@ -188,6 +186,7 @@ class StreamProvider {
               'com.google.android.apps.youtube.vr.oculus/1.65.10 (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip',
           'X-Youtube-Client-Name': '28',
           'X-Youtube-Client-Version': '1.65.10',
+          'X-Goog-Visitor-Id': vData,
           'Content-Type': 'application/json',
         },
       );
@@ -214,121 +213,7 @@ class StreamProvider {
       }
     }
 
-    // Tier 3: Invidious Instances (fallback with Proof-of-Origin token)
-    try {
-      final invidiousResult = await _fetchInvidious(videoId);
-      if (invidiousResult != null && invidiousResult.playable) {
-        return invidiousResult;
-      }
-    } catch (e) {
-      if (e is SocketException) {
-        return StreamProvider(playable: false, statusMSG: "networkError");
-      }
-    }
-
-    // Tier 4: ANDROID SDK-less client (InnerTube fallback)
-    try {
-      final androidData = await _postInnertube(
-        'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
-        {
-          'context': {
-            'client': {
-              'clientName': 'ANDROID',
-              'clientVersion': '20.10.38',
-              'userAgent': 'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip',
-              'hl': 'en',
-              'timeZone': 'UTC',
-              'utcOffsetMinutes': 0,
-              'osName': 'Android',
-              'osVersion': '11',
-            },
-          },
-          'videoId': videoId,
-        },
-        {
-          'User-Agent': 'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip',
-          'X-Youtube-Client-Name': 'ANDROID',
-          'X-Youtube-Client-Version': '20.10.38',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (androidData != null) {
-        final status = androidData['playabilityStatus']?['status']?.toString();
-        final reason = androidData['playabilityStatus']?['reason']?.toString();
-        if (reason != null && reason.isNotEmpty) lastReason = reason;
-
-        if (status == 'OK') {
-          final audios = _parseAudioFromStreamingData(androidData);
-          if (audios.isNotEmpty) {
-            return StreamProvider(
-              playable: true,
-              statusMSG: "OK",
-              audioFormats: audios,
-            );
-          }
-        }
-      }
-    } catch (e) {
-      if (e is SocketException) {
-        return StreamProvider(playable: false, statusMSG: "networkError");
-      }
-    }
-
-    // Tier 3: IOS mobile client (InnerTube fallback)
-    try {
-      final iosData = await _postInnertube(
-        'https://www.youtube.com/youtubei/v1/player?key=AIzaSyB-63vPrdThhKuerbB2N_l7Kwwcxj6yUAc&prettyPrint=false',
-        {
-          'context': {
-            'client': {
-              'clientName': 'IOS',
-              'clientVersion': '20.10.4',
-              'deviceMake': 'Apple',
-              'deviceModel': 'iPhone16,2',
-              'userAgent': 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)',
-              'hl': 'en',
-              'platform': 'MOBILE',
-              'osName': 'IOS',
-              'osVersion': '18.1.0.22B83',
-              'timeZone': 'UTC',
-              'gl': 'US',
-              'utcOffsetMinutes': 0,
-            },
-          },
-          'videoId': videoId,
-        },
-        {
-          'User-Agent': 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)',
-          'X-Youtube-Client-Name': 'IOS',
-          'X-Youtube-Client-Version': '20.10.4',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (iosData != null) {
-        final status = iosData['playabilityStatus']?['status']?.toString();
-        final reason = iosData['playabilityStatus']?['reason']?.toString();
-        if (reason != null && reason.isNotEmpty) lastReason = reason;
-
-        if (status == 'OK') {
-          final audios = _parseAudioFromStreamingData(iosData);
-          if (audios.isNotEmpty) {
-            return StreamProvider(
-              playable: true,
-              statusMSG: "OK",
-              audioFormats: audios,
-            );
-          }
-        }
-      }
-    } catch (e) {
-      if (e is SocketException) {
-        return StreamProvider(playable: false, statusMSG: "networkError");
-      }
-    }
-
-    // Tier 4: YoutubeExplode fallback
+    // Tier 3: YoutubeExplode fallback (robust client-side signature / cipher deobfuscation)
     final yt = YoutubeExplode();
     try {
       final res = await yt.videos.streamsClient.getManifest(videoId);
@@ -366,6 +251,57 @@ class StreamProvider {
       }
     } finally {
       yt.close();
+    }
+
+    // Tier 4: ANDROID SDK-less client (InnerTube fast fallback)
+    try {
+      final androidData = await _postInnertube(
+        'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
+        {
+          'context': {
+            'client': {
+              'clientName': 'ANDROID',
+              'clientVersion': '20.10.38',
+              'userAgent':
+                  'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip',
+              'hl': 'en',
+              'timeZone': 'UTC',
+              'utcOffsetMinutes': 0,
+              'osName': 'Android',
+              'osVersion': '11',
+            },
+          },
+          'videoId': videoId,
+        },
+        {
+          'User-Agent':
+              'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip',
+          'X-Youtube-Client-Name': 'ANDROID',
+          'X-Youtube-Client-Version': '20.10.38',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (androidData != null) {
+        final status = androidData['playabilityStatus']?['status']?.toString();
+        final reason = androidData['playabilityStatus']?['reason']?.toString();
+        if (reason != null && reason.isNotEmpty) lastReason = reason;
+
+        if (status == 'OK') {
+          final audios = _parseAudioFromStreamingData(androidData);
+          if (audios.isNotEmpty) {
+            return StreamProvider(
+              playable: true,
+              statusMSG: "OK",
+              audioFormats: audios,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (e is SocketException) {
+        return StreamProvider(playable: false, statusMSG: "networkError");
+      }
     }
 
     return StreamProvider(
