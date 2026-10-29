@@ -1,122 +1,84 @@
 <div align="center">
 
-```
-   _____ __  ____  ______  __  ______  _   ____  __    __  _____  _____ _________
-  / ___// / / /  |/  / _ \/ / / / __ \/ | / / / / /   /  |/  / / / / ___//  _/ ____/
-  \__ \/ /_/ / /|_/ / // / /_/ / / / /  |/ / /_/ /   / /|_/ / / / /\__ \ / // /     
- ___/ / __  / /  / / ____/\__, / /_/ / /|  /\__, /   / /  / / /_/ /___/ // // /___   
-/____/_/ /_/_/  /_/_/    /____/\____/_/ |_/____/    /_/  /_/\____//____/___/\____/   
-```
+<img src="icon.png" width="96" height="96" alt="Symphony Music Logo" />
 
-### 🛰️ Next-Generation Cybernetic Audio Engine for Android & Desktop
+# Symphony Music
 
-[![Release](https://img.shields.io/badge/Release-v1.12.3-00e5ff?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest)
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
-[![Engine](https://img.shields.io/badge/Audio_Engine-Just_Audio_%2B_MediaKit-ff007f?style=for-the-badge&logo=apple-music&logoColor=white)](https://github.com/Tanatos-theOnly/Symphony-Music)
-[![License](https://img.shields.io/badge/License-GPL_v3.0-00ff66?style=for-the-badge&logo=gnu&logoColor=black)](LICENSE)
-[![Security](https://img.shields.io/badge/Signature-Signed_Keystore-blueviolet?style=for-the-badge&logo=google-authenticator&logoColor=white)](https://github.com/Tanatos-theOnly/Symphony-Music)
+A modern, fast, and open-source music streaming application for Android and Desktop.
 
-<p align="center">
-  <a href="#-quick-download"><b>📥 Download APK</b></a> •
-  <a href="#-core-features"><b>⚡ Key Features</b></a> •
-  <a href="#-architecture"><b>🧠 Architecture</b></a> •
-  <a href="#-troubleshooting"><b>🛠️ Troubleshooting</b></a>
-</p>
+[![Release](https://img.shields.io/github/v/release/Tanatos-theOnly/Symphony-Music?style=flat&logo=android&color=blue)](https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest)
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat&logo=flutter&logoColor=white)](https://flutter.dev)
+[![License](https://img.shields.io/badge/License-GPL_v3.0-green?style=flat)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Windows%20%7C%20Linux-lightgrey?style=flat)]()
 
----
+<br />
+
+[**Download Latest APK**](https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest) • [**Report an Issue**](https://github.com/Tanatos-theOnly/Symphony-Music/issues) • [**Changelog**](CHANGELOG.md)
+
+<br />
+
+<img src="cover.png" alt="Symphony Music Preview" width="100%" />
 
 </div>
 
-## 📟 System Diagnostic & Initialization Log
+## Overview
 
-```console
-[SYS_BOOT]  Initializing Symphony Core Kernel v1.12.3...
-[STREAM_OK] Native YouTube Explode chunked transport established.
-[AUDIO_DSP] JNI Hardware 10-Band Equalizer: ACTIVE (com.rohannet.symphonymusic)
-[BOLI_ALG]  Vibe-Vault Engine initialized: Dynamic Recommendation ready.
-[SECURITY]  SHA-256 Release Keystore Verified. All systems nominal.
-```
+Symphony Music is an open-source, ad-free music streaming app built with Flutter. It lets you stream, discover, and download music directly with zero subscription fees, no user accounts, and complete privacy.
 
 ---
 
-## ⚡ Core Features
+## Features
 
-| Feature | Description | Status |
-| :--- | :--- | :---: |
-| 🚀 **High-Speed Chunked Downloader** | Direct chunk-buffered download engine bypasses CDN timeouts and drops. | `STABLE` |
-| 🧬 **BOLI Vibe Intelligence** | Smart local listening telemetry creates custom dynamic vibes. | `ACTIVE` |
-| 🎚️ **JNI Hardware Equalizer** | Native low-latency DSP equalizer with bass boost and virtualizer. | `ACTIVE` |
-| 🌐 **Zero Ads & Zero Login** | Pure streaming with no trackers, telemetry, or account barriers. | `ENABLED` |
-| 📜 **Real-time Synced Lyrics** | Millisecond-accurate synchronized lyrics powered by LRCLIB. | `SYNCED` |
-| 🛡️ **Self-Healing In-App Updater** | Automated GitHub Release detector with live progress and fallback. | `ACTIVE` |
-
----
-
-## 📥 Quick Download
-
-<div align="center">
-
-| Release Target | Architecture | Direct Download |
-| :--- | :---: | :---: |
-| **Symphony Music v1.12.3** | Universal (`arm64-v8a`, `armeabi-v7a`, `x86_64`) | [**Download Signed APK**](https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest) |
-
-> **Note:** This APK is securely signed with our release keystore. If Android displays an *Unknown Sources* warning, tap **Settings ➔ Allow from this source** to proceed.
-
-</div>
+- **Ad-Free Streaming**: Seamless background playback with no ads or interruptions.
+- **Offline Downloads**: High-speed song downloading with chunked stream buffering and audio tag metadata embedding.
+- **Synchronized Lyrics**: Real-time synchronized lyrics support powered by LRCLIB.
+- **Audio Equalizer**: Native 10-band hardware equalizer with bass boost and virtualizer.
+- **Smart Recommendations**: Smart content discovery based on your recently played music.
+- **Dynamic Theming**: Adapts dynamically to your device wallpaper or custom color themes.
+- **Android Auto & Background Play**: Full integration with Android Auto, notification controls, and lockscreen media session.
+- **Sleep Timer & Skip Silence**: Built-in sleep timer and audio processing to remove silent intervals.
+- **In-App Updates**: Built-in release detector to download and install new updates with one tap.
 
 ---
 
-## 🧠 Architecture Overview
+## Download
 
-Symphony Music is built with a resilient, reactive multi-layer architecture:
+Get the latest stable release for Android directly from GitHub:
 
-```
-┌────────────────────────────────────────────────────────┐
-│                   Flutter Presentation UI              │
-│       GetX State Management  •  Orbitron Sci-Fi Theme  │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-┌──────────────────────────▼─────────────────────────────┐
-│                 Symphony Services Layer                │
-│    Downloader (Chunked) • BOLI Engine • AudioHandler   │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-┌──────────────────────────▼─────────────────────────────┐
-│              Native Platform Bridge (JNI)              │
-│  com.rohannet.symphonymusic.Equalizer / FileProvider   │
-└──────────────────────────┘
-```
+| Platform | Download Link | Notes |
+| :--- | :--- | :--- |
+| **Android** | [**app-release.apk**](https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest) | Universal build (`arm64-v8a`, `armeabi-v7a`, `x86_64`) |
+
+> **Installation note**: If Android displays an *Unknown Sources* prompt during installation, tap **Settings** and allow installs from your browser or file manager.
 
 ---
 
-## 🛠️ Developer Setup
+## Building from Source
 
-If you want to build the project locally from source:
+### Prerequisites
+- Flutter SDK (3.x or later)
+- Android SDK & JDK 17
+- Git
+
+### Build Steps
 
 ```bash
-# 1. Clone repository
+# Clone the repository
 git clone https://github.com/Tanatos-theOnly/Symphony-Music.git
 cd Symphony-Music
 
-# 2. Get dependencies
+# Fetch dependencies
 flutter pub get
 
-# 3. Analyze code
-flutter analyze
-
-# 4. Compile signed release APK
+# Build the release APK
 flutter build apk --release
 ```
 
+The compiled APK will be output to:  
+`build/app/outputs/flutter-apk/app-release.apk`
+
 ---
 
-<div align="center">
+## License
 
-### 👨‍💻 Lead Architect & Maintainer
-
-**REDDY A. ROHAN** (`Tanatos-theOnly`)  
-*Crafted on Earth • Designed for the Cosmos*
-
-[![GitHub](https://img.shields.io/badge/GitHub-Tanatos--theOnly-181717?style=flat-square&logo=github)](https://github.com/Tanatos-theOnly)
-
-</div>
+This project is licensed under the **GNU General Public License v3.0** (GPL-3.0). See the [LICENSE](LICENSE) file for full details.
