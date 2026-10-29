@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
@@ -25,107 +24,147 @@ class BottomNavBar extends StatelessWidget {
 
     return Obx(() {
       final activeColor = themeCtrl?.primaryColor.value ??
-          Theme.of(context).colorScheme.secondary;
+          const Color(0xFF4FA5FF);
       final selectedIndex = homeScreenController.tabIndex.toInt();
+      final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-      return ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-          child: Container(
-            height: 64 + MediaQuery.of(context).padding.bottom,
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).padding.bottom > 0
-                  ? MediaQuery.of(context).padding.bottom - 4
-                  : 6,
-              top: 6,
-              left: 12,
-              right: 12,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0x380F1116),
-              border: Border(
-                top: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  width: 0.6,
+      return Container(
+        padding: EdgeInsets.only(
+          bottom: bottomPadding > 0 ? bottomPadding : 10,
+          left: 18,
+          right: 18,
+          top: 6,
+        ),
+        color: Colors.transparent,
+        child: SizedBox(
+          height: 68,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              // 1. The Elongated Matte Obsidian Pill Dock Track
+              Container(
+                height: 58,
+                decoration: BoxDecoration(
+                  color: const Color(0xF20B0D12),
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    width: 0.8,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.50),
+                      blurRadius: 22,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  blurRadius: 16,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(tabs.length, (index) {
-                final isSelected = selectedIndex == index;
-                final tab = tabs[index];
 
-                return Expanded(
-                  child: FlowyButton(
-                    onTap: () => homeScreenController.onBottonBarTabSelected(index),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOutCubic,
-                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: isSelected
-                            ? activeColor.withValues(alpha: 0.18)
-                            : Colors.transparent,
-                        border: isSelected
-                            ? Border.all(
-                                color: Colors.white.withValues(alpha: 0.20),
-                                width: 0.6,
-                              )
-                            : Border.all(color: Colors.transparent),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: activeColor.withValues(alpha: 0.25),
-                                  blurRadius: 12,
-                                  spreadRadius: -2,
-                                )
-                              ]
-                            : null,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            isSelected
-                                ? tab['activeIcon'] as IconData
-                                : tab['icon'] as IconData,
-                            size: 22,
-                            color: isSelected
-                                ? Colors.white
-                                : Colors.white.withValues(alpha: 0.60),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            modifyNgetlabel(tab['label'] as String),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              fontWeight:
-                                  isSelected ? FontWeight.w600 : FontWeight.w400,
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.55),
-                              letterSpacing: 0.2,
+              // 2. The 3D Liquid Glass Pebble Indicator (Fluid Sliding Dome)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final tabWidth = constraints.maxWidth / tabs.length;
+                  final alignX = -1.0 +
+                      (selectedIndex * (2.0 / (tabs.length - 1)));
+
+                  return AnimatedAlign(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment(alignX, 0.0),
+                    child: SizedBox(
+                      width: tabWidth + 8,
+                      height: 66, // 3D Dome gracefully bulges over the 58px track!
+                      child: LiquidGlassPebble(
+                        borderRadius: BorderRadius.circular(22),
+                        chromaticColor: activeColor,
+                        highlightIntensity: 1.0,
+                        hasDropShadow: true,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 4, vertical: 4),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              tabs[selectedIndex]['activeIcon'] as IconData,
+                              size: 21,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.white.withValues(alpha: 0.60),
+                                  blurRadius: 8,
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 2),
+                            Text(
+                              modifyNgetlabel(
+                                  tabs[selectedIndex]['label'] as String),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }),
-            ),
+                  );
+                },
+              ),
+
+              // 3. Tab Touch Zones & Inactive Icons
+              Row(
+                children: List.generate(tabs.length, (index) {
+                  final isSelected = selectedIndex == index;
+                  final tab = tabs[index];
+
+                  return Expanded(
+                    child: FlowyButton(
+                      onTap: () =>
+                          homeScreenController.onBottonBarTabSelected(index),
+                      child: Container(
+                        height: 58,
+                        color: Colors.transparent,
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: isSelected ? 0.0 : 1.0,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                tab['icon'] as IconData,
+                                size: 21,
+                                color: Colors.white.withValues(alpha: 0.50),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                modifyNgetlabel(tab['label'] as String),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white.withValues(alpha: 0.45),
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
         ),
       );

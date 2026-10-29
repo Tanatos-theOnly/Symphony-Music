@@ -169,43 +169,60 @@ class Player extends StatelessWidget {
                                             .isQueueLoopModeEnabled.isTrue;
                                         final activeColor = themeCtrl
                                                 ?.primaryColor.value ??
-                                            Theme.of(context)
-                                                .colorScheme
-                                                .primary;
+                                            const Color(0xFF4FA5FF);
 
-                                        return AnimatedContainer(
-                                          duration:
-                                              const Duration(milliseconds: 200),
-                                          height: 32,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 14),
-                                          decoration: BoxDecoration(
-                                            color: isLoop
-                                                ? activeColor
-                                                    .withValues(alpha: 0.70)
-                                                : Colors.white
-                                                    .withValues(alpha: 0.12),
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            border: Border.all(
-                                              color: Colors.white
-                                                  .withValues(alpha: 0.22),
-                                              width: 0.7,
-                                            ),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              "queueLoop".tr,
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: isLoop
-                                                    ? FontWeight.w600
-                                                    : FontWeight.w400,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        );
+                                        return isLoop
+                                            ? LiquidGlassPebble(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                chromaticColor: activeColor,
+                                                highlightIntensity: 1.0,
+                                                hasDropShadow: false,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 14,
+                                                        vertical: 6),
+                                                child: Text(
+                                                  "queueLoop".tr,
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w600,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              )
+                                            : Container(
+                                                height: 32,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 14),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.10),
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                  border: Border.all(
+                                                    color: Colors.white
+                                                        .withValues(
+                                                            alpha: 0.18),
+                                                    width: 0.7,
+                                                  ),
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    "queueLoop".tr,
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color: Colors.white
+                                                          .withValues(
+                                                              alpha: 0.75),
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
                                       },
                                     ),
                                   ),
@@ -226,26 +243,18 @@ class Player extends StatelessWidget {
                                       }
                                       playerController.shuffleQueue();
                                     },
-                                    child: Container(
+                                    child: LiquidGlassPebble(
+                                      width: 42,
                                       height: 32,
-                                      width: 40,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.14),
-                                        borderRadius:
-                                            BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.22),
-                                          width: 0.7,
-                                        ),
-                                      ),
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.shuffle,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
+                                      borderRadius: BorderRadius.circular(18),
+                                      chromaticColor: const Color(0xFF4FA5FF),
+                                      highlightIntensity: 0.85,
+                                      hasDropShadow: false,
+                                      padding: EdgeInsets.zero,
+                                      child: const Icon(
+                                        Icons.shuffle,
+                                        color: Colors.white,
+                                        size: 18,
                                       ),
                                     ),
                                   ),
@@ -257,26 +266,18 @@ class Player extends StatelessWidget {
                                     onTap: () {
                                       playerController.clearQueue();
                                     },
-                                    child: Container(
+                                    child: LiquidGlassPebble(
+                                      width: 42,
                                       height: 32,
-                                      width: 40,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.14),
-                                        borderRadius:
-                                            BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.22),
-                                          width: 0.7,
-                                        ),
-                                      ),
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.playlist_remove,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
+                                      borderRadius: BorderRadius.circular(18),
+                                      chromaticColor: const Color(0xFF4FA5FF),
+                                      highlightIntensity: 0.85,
+                                      hasDropShadow: false,
+                                      padding: EdgeInsets.zero,
+                                      child: const Icon(
+                                        Icons.playlist_remove,
+                                        color: Colors.white,
+                                        size: 18,
                                       ),
                                     ),
                                   ),

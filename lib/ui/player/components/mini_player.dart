@@ -37,10 +37,13 @@ class MiniPlayer extends StatelessWidget {
             width: size.width,
             color: Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            child: LiquidGlassContainer(
-              borderRadius: BorderRadius.circular(22),
-              blurSigma: 20.0,
-              borderWidth: 0.8,
+            child: LiquidGlassPebble(
+              borderRadius: BorderRadius.circular(24),
+              chromaticColor: Get.isRegistered<ThemeController>()
+                  ? Get.find<ThemeController>().primaryColor.value
+                  : null,
+              highlightIntensity: 1.0,
+              hasDropShadow: true,
               padding: EdgeInsets.zero,
               child: Center(
                 child: Column(

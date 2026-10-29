@@ -4,6 +4,267 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '/ui/utils/theme_controller.dart';
 
+/// 3D Liquid Glass Pebble Painter
+/// Replicates the raytraced 3D convex glass dome seen in Apple Vision & Liquid Glass Studio:
+/// - Curved top specular meniscus cap (silver-to-dark gradient)
+/// - Electric-cyan chromatic dispersion fringe along the upper & lower rims
+/// - Razor-sharp white specular highlight edges
+/// - Bottom caustic crescent reflection
+/// - Deep obsidian convex glass body
+/// - 3D floating ambient drop shadow
+class LiquidGlassPebblePainter extends CustomPainter {
+  final Color chromaticColor;
+  final double highlightIntensity;
+  final BorderRadius borderRadius;
+  final bool hasDropShadow;
+
+  LiquidGlassPebblePainter({
+    this.chromaticColor = const Color(0xFF4FA5FF),
+    this.highlightIntensity = 1.0,
+    this.borderRadius = const BorderRadius.all(Radius.circular(24)),
+    this.hasDropShadow = true,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.width <= 0 || size.height <= 0) return;
+
+    final rect = Offset.zero & size;
+    final rrect = borderRadius.toRRect(rect);
+
+    // 1. Ambient Depth Shadow (gives physical 3D elevation above the dock)
+    if (hasDropShadow) {
+      final shadowPaint = Paint()
+        ..color = Colors.black.withValues(alpha: 0.45)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14);
+      canvas.drawRRect(rrect.shift(const Offset(0, 6)), shadowPaint);
+    }
+
+    // 2. Base Obsidian Glass Body (deep convex crystal core)
+    final bodyPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0x351A202A),
+          Color(0x700C0E14),
+          Color(0x9507080B),
+        ],
+        stops: [0.0, 0.45, 1.0],
+      ).createShader(rect);
+    canvas.drawRRect(rrect, bodyPaint);
+
+    canvas.save();
+    canvas.clipRRect(rrect);
+
+    // 3. Top Specular Meniscus Cap (The 3D Glass Dome Highlight)
+    final topCapHeight = size.height * 0.38;
+    final topRect = Rect.fromLTWH(0, 0, size.width, topCapHeight);
+
+    final topCapPath = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, topCapHeight * 0.55)
+      ..quadraticBezierTo(
+        size.width * 0.5,
+        topCapHeight * 1.15,
+        0,
+        topCapHeight * 0.55,
+      )
+      ..close();
+
+    final topCapPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          const Color(0xFFCAD4DE).withValues(alpha: 0.85 * highlightIntensity),
+          const Color(0xFF8A98A6).withValues(alpha: 0.55 * highlightIntensity),
+          const Color(0xFF323B45).withValues(alpha: 0.15 * highlightIntensity),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.32, 0.72, 1.0],
+      ).createShader(topRect);
+    canvas.drawPath(topCapPath, topCapPaint);
+
+    // Top Chromatic Dispersion Arc (Electric Cyan / Blue Fringe)
+    final topFringePath = Path()
+      ..moveTo(size.width * 0.10, 1.5)
+      ..quadraticBezierTo(
+        size.width * 0.5,
+        0.5,
+        size.width * 0.90,
+        1.5,
+      );
+    final topFringePaint = Paint()
+      ..color = chromaticColor.withValues(alpha: 0.80 * highlightIntensity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5);
+    canvas.drawPath(topFringePath, topFringePaint);
+
+    // Razor-Sharp White Top Specular Edge
+    final topEdgePaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [
+          Colors.transparent,
+          Colors.white.withValues(alpha: 0.95 * highlightIntensity),
+          Colors.white.withValues(alpha: 0.95 * highlightIntensity),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.22, 0.78, 1.0],
+      ).createShader(topRect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    canvas.drawPath(topFringePath, topEdgePaint);
+
+    // 4. Bottom Caustic Crescent Reflection
+    final botCapHeight = size.height * 0.26;
+    final botRect = Rect.fromLTWH(0, size.height - botCapHeight, size.width, botCapHeight);
+
+    final botCapPath = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(size.width, size.height)
+      ..lineTo(size.width, size.height - botCapHeight * 0.5)
+      ..quadraticBezierTo(
+        size.width * 0.5,
+        size.height - botCapHeight * 1.15,
+        0,
+        size.height - botCapHeight * 0.5,
+      )
+      ..close();
+
+    final botCapPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: [
+          const Color(0xFFC4D2DF).withValues(alpha: 0.75 * highlightIntensity),
+          const Color(0xFF6B7B8E).withValues(alpha: 0.35 * highlightIntensity),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.42, 1.0],
+      ).createShader(botRect);
+    canvas.drawPath(botCapPath, botCapPaint);
+
+    // Bottom Chromatic Dispersion Arc (Electric Cyan / Blue Fringe)
+    final botFringePath = Path()
+      ..moveTo(size.width * 0.12, size.height - 1.5)
+      ..quadraticBezierTo(
+        size.width * 0.5,
+        size.height - 0.5,
+        size.width * 0.88,
+        size.height - 1.5,
+      );
+    final botFringePaint = Paint()
+      ..color = chromaticColor.withValues(alpha: 0.75 * highlightIntensity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5);
+    canvas.drawPath(botFringePath, botFringePaint);
+
+    // Razor-Sharp White Bottom Specular Edge
+    final botEdgePaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [
+          Colors.transparent,
+          Colors.white.withValues(alpha: 0.90 * highlightIntensity),
+          Colors.white.withValues(alpha: 0.90 * highlightIntensity),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.22, 0.78, 1.0],
+      ).createShader(botRect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    canvas.drawPath(botFringePath, botEdgePaint);
+
+    canvas.restore();
+
+    // 5. Outer Fresnel Rim Border (Lateral Wet Edges)
+    final borderPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withValues(alpha: 0.40),
+          Colors.white.withValues(alpha: 0.12),
+          Colors.white.withValues(alpha: 0.08),
+          Colors.white.withValues(alpha: 0.38),
+        ],
+        stops: const [0.0, 0.2, 0.8, 1.0],
+      ).createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.8;
+    canvas.drawRRect(rrect, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant LiquidGlassPebblePainter oldDelegate) {
+    return oldDelegate.chromaticColor != chromaticColor ||
+        oldDelegate.highlightIntensity != highlightIntensity ||
+        oldDelegate.borderRadius != borderRadius ||
+        oldDelegate.hasDropShadow != hasDropShadow;
+  }
+}
+
+/// 3D Liquid Glass Pebble Widget
+/// Wraps content in the exact 3D raytraced convex glass lens.
+class LiquidGlassPebble extends StatelessWidget {
+  final Widget child;
+  final double? width;
+  final double? height;
+  final BorderRadius? borderRadius;
+  final Color? chromaticColor;
+  final double highlightIntensity;
+  final bool hasDropShadow;
+  final EdgeInsetsGeometry padding;
+
+  const LiquidGlassPebble({
+    super.key,
+    required this.child,
+    this.width,
+    this.height,
+    this.borderRadius,
+    this.chromaticColor,
+    this.highlightIntensity = 1.0,
+    this.hasDropShadow = true,
+    this.padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveRadius = borderRadius ?? BorderRadius.circular(24);
+    final themeCtrl = Get.isRegistered<ThemeController>()
+        ? Get.find<ThemeController>()
+        : null;
+
+    final effectiveChromatic = chromaticColor ??
+        (themeCtrl?.primaryColor.value ?? const Color(0xFF4FA5FF));
+
+    return RepaintBoundary(
+      child: CustomPaint(
+        painter: LiquidGlassPebblePainter(
+          chromaticColor: effectiveChromatic,
+          highlightIntensity: highlightIntensity,
+          borderRadius: effectiveRadius,
+          hasDropShadow: hasDropShadow,
+        ),
+        child: Container(
+          width: width,
+          height: height,
+          padding: padding,
+          alignment: Alignment.center,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 /// Apple iOS 18 style Liquid Glass Container
 /// Crystal-clear acrylic transparency with specular highlight reflection
 /// and chromatic refraction from the background/music theme.

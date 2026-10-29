@@ -136,47 +136,23 @@ class PlayerControlWidget extends StatelessWidget {
               ),
               _previousButton(playerController, context),
               FlowyButton(
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white.withValues(alpha: 0.25),
-                        Colors.white.withValues(alpha: 0.08),
-                      ],
-                    ),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.32),
-                      width: 1.0,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: (Get.isRegistered<ThemeController>()
-                                    ? Get.find<ThemeController>()
-                                        .primaryColor
-                                        .value
-                                    : Theme.of(context).primaryColor)
-                                ?.withValues(alpha: 0.35) ??
-                            Colors.white.withValues(alpha: 0.2),
-                        blurRadius: 20,
-                        spreadRadius: -2,
-                        offset: const Offset(0, 4),
+                child: SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: LiquidGlassPebble(
+                    borderRadius: BorderRadius.circular(36),
+                    chromaticColor: (Get.isRegistered<ThemeController>()
+                            ? Get.find<ThemeController>().primaryColor.value
+                            : null) ??
+                        const Color(0xFF4FA5FF),
+                    highlightIntensity: 1.0,
+                    hasDropShadow: true,
+                    padding: EdgeInsets.zero,
+                    child: const Center(
+                      child: AnimatedPlayButton(
+                        key: Key("playButton"),
+                        iconSize: 36,
                       ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.30),
-                        blurRadius: 14,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: AnimatedPlayButton(
-                      key: Key("playButton"),
-                      iconSize: 36,
                     ),
                   ),
                 ),

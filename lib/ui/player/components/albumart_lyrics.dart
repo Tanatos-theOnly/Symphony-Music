@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '/ui/player/components/lyrics_widget.dart';
 import '/ui/player/player_controller.dart';
 import '/ui/widgets/liquid_glass.dart';
+import '/ui/utils/theme_controller.dart';
 import '../../widgets/image_widget.dart';
 import '../../widgets/sleep_timer_bottom_sheet.dart';
 import '../../widgets/songinfo_bottom_sheet.dart';
@@ -61,10 +62,13 @@ class AlbumArtNLyrics extends StatelessWidget {
                       onTap: () {
                         playerController.showLyrics();
                       },
-                      child: LiquidGlassContainer(
+                      child: LiquidGlassPebble(
                         borderRadius: BorderRadius.circular(24),
-                        blurSigma: 24.0,
-                        borderWidth: 0.8,
+                        chromaticColor: Get.isRegistered<ThemeController>()
+                            ? Get.find<ThemeController>().primaryColor.value
+                            : null,
+                        highlightIntensity: 1.0,
+                        hasDropShadow: false,
                         width: playerArtImageSize,
                         height: playerArtImageSize,
                         padding: EdgeInsets.zero,

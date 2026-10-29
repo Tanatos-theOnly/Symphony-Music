@@ -20,15 +20,27 @@ class LyricsSwitch extends StatelessWidget {
       }
 
       final activeColor = themeCtrl?.primaryColor.value ??
-          Theme.of(context).colorScheme.primary;
+          const Color(0xFF4FA5FF);
       final selectedMode = playerController.lyricsMode.value;
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 12.0),
-        child: LiquidGlassContainer(
-          borderRadius: BorderRadius.circular(24),
-          blurSigma: 16.0,
-          borderWidth: 0.8,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xF00D0F14),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.12),
+              width: 0.8,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.40),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           padding: const EdgeInsets.all(3),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -58,46 +70,39 @@ class LyricsSwitch extends StatelessWidget {
     required Color activeColor,
     required VoidCallback onTap,
   }) {
+    if (isSelected) {
+      return FlowyButton(
+        onTap: onTap,
+        child: LiquidGlassPebble(
+          borderRadius: BorderRadius.circular(20),
+          chromaticColor: activeColor,
+          highlightIntensity: 1.0,
+          hasDropShadow: false,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ),
+      );
+    }
+
     return FlowyButton(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 240),
-        curve: Curves.easeOutCubic,
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: isSelected
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    activeColor.withValues(alpha: 0.75),
-                    activeColor.withValues(alpha: 0.50),
-                  ],
-                )
-              : null,
-          border: isSelected
-              ? Border.all(
-                  color: Colors.white.withValues(alpha: 0.28),
-                  width: 0.8,
-                )
-              : Border.all(color: Colors.transparent),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: activeColor.withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    spreadRadius: -1,
-                  ),
-                ]
-              : null,
-        ),
+        color: Colors.transparent,
         child: Text(
           label,
           style: TextStyle(
             fontSize: 12.5,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.65),
+            fontWeight: FontWeight.w400,
+            color: Colors.white.withValues(alpha: 0.50),
             letterSpacing: 0.3,
           ),
         ),
