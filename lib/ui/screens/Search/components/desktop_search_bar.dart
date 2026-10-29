@@ -1,4 +1,3 @@
-import '/ui/widgets/liquid_glass.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -63,12 +62,11 @@ class DesktopSearchBar extends StatelessWidget {
         ),
         Padding(
             padding: const EdgeInsets.only(top: 10.0),
-            child: LiquidGlassContainer(
-              borderRadius: BorderRadius.circular(20),
-              blurSigma: 20,
-              padding: EdgeInsets.zero,
-              child: Container(
-                constraints: const BoxConstraints(minHeight: 0, maxHeight: 300),
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  borderRadius: BorderRadius.circular(20)),
+              constraints: const BoxConstraints(minHeight: 0, maxHeight: 300),
               child: Obx(() {
                 final isHistoryString =
                     searchScreenController.textInputController.text.isEmpty &&
@@ -106,7 +104,6 @@ class DesktopSearchBar extends StatelessWidget {
                         : const SizedBox.shrink();
               }),
             ))
-        )
       ],
     );
   }

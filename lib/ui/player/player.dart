@@ -1,3 +1,4 @@
+import 'dart:ui';
 
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -49,26 +50,46 @@ class Player extends StatelessWidget {
           /// contains the Apple-style pill grabber to open the queue panel
           collapsed: InkWell(
             onTap: () {
+              /// queue open in end drawer in desktop
               if (GetPlatform.isDesktop) {
                 playerController.homeScaffoldkey.currentState!.openEndDrawer();
               } else {
                 playerController.queuePanelController.open();
               }
             },
-            child: LiquidGlassContainer(
+            child: ClipRRect(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(24)),
-              blurSigma: 24,
-              padding: EdgeInsets.zero,
-              child: SizedBox(
-                height: 65,
-                child: Center(
-                  child: Container(
-                    width: 40,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.40),
-                      borderRadius: BorderRadius.circular(10),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  height: 65,
+                  decoration: BoxDecoration(
+                    color: const Color(0x350F121A),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(24)),
+                    border: Border(
+                      top: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.22),
+                        width: 0.8,
+                      ),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.35),
+                        blurRadius: 18,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.40),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
                 ),
@@ -93,15 +114,30 @@ class Player extends StatelessWidget {
                 /// and number of songs in queue
                 Align(
                   alignment: Alignment.bottomCenter,
-                  child: LiquidGlassContainer(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(20)),
-                    blurSigma: 24,
-                    padding: const EdgeInsets.only(
-                        top: 15, bottom: 10, left: 14, right: 14),
-                    child: SizedBox(
-                      height: 60 + Get.mediaQuery.padding.bottom,
-                      child: Align(
+                  child: ClipRRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                      child: Container(
+                        padding: const EdgeInsets.only(
+                            top: 15, bottom: 10, left: 14, right: 14),
+                        decoration: BoxDecoration(
+                          color: const Color(0x380F121A),
+                          border: Border(
+                            top: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              width: 0.6,
+                            ),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 16,
+                              color: Colors.black.withValues(alpha: 0.35),
+                              offset: const Offset(0, -3),
+                            )
+                          ],
+                        ),
+                        height: 60 + Get.mediaQuery.padding.bottom,
+                        child: Align(
                           alignment: Alignment.topCenter,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -253,6 +289,7 @@ class Player extends StatelessWidget {
                       ),
                     ),
                   ),
+                ),
               ],
             );
           },
