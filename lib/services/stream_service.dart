@@ -14,12 +14,12 @@ class StreamProvider {
     Map<String, dynamic> body,
     Map<String, String> headers,
   ) async {
-    final client = HttpClient();
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
     try {
-      final request = await client.postUrl(Uri.parse(url));
+      final request = await client.postUrl(Uri.parse(url)).timeout(const Duration(seconds: 5));
       headers.forEach((k, v) => request.headers.set(k, v));
       request.write(jsonEncode(body));
-      final response = await request.close();
+      final response = await request.close().timeout(const Duration(seconds: 5));
       final responseBody = await response.transform(utf8.decoder).join();
       if (response.statusCode == 200) {
         return jsonDecode(responseBody) as Map<String, dynamic>;
@@ -113,7 +113,108 @@ class StreamProvider {
   static Future<StreamProvider> fetch(String videoId) async {
     String lastReason = "Song is unplayable";
 
-    // Tier 1: Invidious Instances (provides valid Proof-of-Origin token and full unthrottled streaming)
+    // Tier 1: VISIONOS client (Echo-Music / Musify primary engine - whole-file capable without 403 throttling)
+    try {
+      final visionOsData = await _postInnertube(
+        'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
+        {
+          'context': {
+            'client': {
+              'clientName': 'VISIONOS',
+              'clientVersion': '0.1',
+              'deviceMake': 'Apple',
+              'deviceModel': 'RealityDevice14,1',
+              'osName': 'visionOS',
+              'osVersion': '1.3.21O771',
+              'hl': 'en',
+              'gl': 'US',
+            },
+          },
+          'videoId': videoId,
+        },
+        {
+          'User-Agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15',
+          'X-Youtube-Client-Name': '101',
+          'X-Youtube-Client-Version': '0.1',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (visionOsData != null) {
+        final status = visionOsData['playabilityStatus']?['status']?.toString();
+        final reason = visionOsData['playabilityStatus']?['reason']?.toString();
+        if (reason != null && reason.isNotEmpty) lastReason = reason;
+
+        if (status == 'OK') {
+          final audios = _parseAudioFromStreamingData(visionOsData);
+          if (audios.isNotEmpty) {
+            return StreamProvider(
+              playable: true,
+              statusMSG: "OK",
+              audioFormats: audios,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (e is SocketException) {
+        return StreamProvider(playable: false, statusMSG: "networkError");
+      }
+    }
+
+    // Tier 2: ANDROID_VR client (Echo-Music secondary engine)
+    try {
+      final vrData = await _postInnertube(
+        'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
+        {
+          'context': {
+            'client': {
+              'clientName': 'ANDROID_VR',
+              'clientVersion': '1.65.10',
+              'deviceMake': 'Oculus',
+              'deviceModel': 'Quest 3',
+              'osName': 'Android',
+              'osVersion': '12L',
+              'androidSdkVersion': '32',
+              'hl': 'en',
+              'gl': 'US',
+            },
+          },
+          'videoId': videoId,
+        },
+        {
+          'User-Agent':
+              'com.google.android.apps.youtube.vr.oculus/1.65.10 (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip',
+          'X-Youtube-Client-Name': '28',
+          'X-Youtube-Client-Version': '1.65.10',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (vrData != null) {
+        final status = vrData['playabilityStatus']?['status']?.toString();
+        final reason = vrData['playabilityStatus']?['reason']?.toString();
+        if (reason != null && reason.isNotEmpty) lastReason = reason;
+
+        if (status == 'OK') {
+          final audios = _parseAudioFromStreamingData(vrData);
+          if (audios.isNotEmpty) {
+            return StreamProvider(
+              playable: true,
+              statusMSG: "OK",
+              audioFormats: audios,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (e is SocketException) {
+        return StreamProvider(playable: false, statusMSG: "networkError");
+      }
+    }
+
+    // Tier 3: Invidious Instances (fallback with Proof-of-Origin token)
     try {
       final invidiousResult = await _fetchInvidious(videoId);
       if (invidiousResult != null && invidiousResult.playable) {
@@ -125,8 +226,7 @@ class StreamProvider {
       }
     }
 
-
-    // Tier 2: ANDROID SDK-less client (InnerTube fallback) (current InnerTube standard, no PO-Token required)
+    // Tier 4: ANDROID SDK-less client (InnerTube fallback)
     try {
       final androidData = await _postInnertube(
         'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',

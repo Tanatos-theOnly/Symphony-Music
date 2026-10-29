@@ -191,7 +191,10 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
           playing: false,
         ));
         try {
-          Get.find<PlayerController>().notifyPlayError("Unable to play track: stream error");
+          final errorMsg = e.toString().contains("403")
+              ? "Playback forbidden (403): stream access expired or blocked"
+              : "Unable to play track: playback stream error";
+          Get.find<PlayerController>().notifyPlayError(errorMsg);
         } catch (_) {}
       }
     });
@@ -279,28 +282,78 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
     queue.add(newQueue);
   }
 
+  Map<String, String>? _getMediaHeaders(String url) {
+    if (!url.contains("googlevideo.com")) return null;
+    final uri = Uri.tryParse(url);
+    final client = uri?.queryParameters['c']?.toUpperCase() ?? '';
+
+    if (client.startsWith('TVHTML5')) {
+      return {
+        'User-Agent':
+            'Mozilla/5.0(SMART-TV; Linux; Tizen 4.0.0.2) AppleWebkit/605.1.15 (KHTML, like Gecko) SamsungBrowser/9.2 TV Safari/605.1.15',
+        'Origin': 'https://www.youtube.com',
+        'Referer': 'https://www.youtube.com/',
+      };
+    } else if (client.startsWith('IOS') || client.contains('IPADOS')) {
+      return {
+        'User-Agent':
+            'com.google.ios.youtube/21.26.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)',
+      };
+    } else if (client == 'VISIONOS') {
+      return {
+        'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15',
+      };
+    } else if (client == 'WEB_REMIX') {
+      return {
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+        'Origin': 'https://music.youtube.com',
+        'Referer': 'https://music.youtube.com/',
+      };
+    } else if (client.startsWith('WEB') || client == 'MWEB') {
+      return {
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+        'Origin': 'https://www.youtube.com',
+        'Referer': 'https://www.youtube.com/',
+      };
+    } else if (client == 'ANDROID_MUSIC') {
+      return {
+        'User-Agent':
+            'com.google.android.apps.youtube.music/8.39.42 (Linux; U; Android 15; en_US; Pixel 9 Pro; Build/AP4A.250205.002) gzip',
+      };
+    } else if (client == 'ANDROID_VR') {
+      return {
+        'User-Agent':
+            'com.google.android.apps.youtube.vr.oculus/1.65.10 (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip',
+      };
+    } else {
+      return {
+        'User-Agent':
+            'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip',
+      };
+    }
+  }
+
   AudioSource _createAudioSource(MediaItem mediaItem) {
     final url = mediaItem.extras!['url'] as String;
-    final headers = url.contains("googlevideo.com")
-        ? {'User-Agent': 'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip'}
-        : null;
-    if (url.contains('/cache') ||
-        (Get.find<SettingsScreenController>().cacheSongs.isTrue &&
-            url.contains("http"))) {
-      printINFO("Playing Using LockCaching");
-      isPlayingUsingLockCachingSource = true;
-      return LockCachingAudioSource(
-        Uri.parse(url),
-        cacheFile: File("$_cacheDir/cachedSongs/${mediaItem.id}.mp3"),
-        tag: mediaItem,
-        headers: headers,
-      );
+
+    // 1. If local cached file exists, play directly from disk
+    final localCachedFile = File("$_cacheDir/cachedSongs/${mediaItem.id}.mp3");
+    if (url.startsWith('file://') || localCachedFile.existsSync()) {
+      printINFO("Playing from local storage: ${mediaItem.id}");
+      isPlayingUsingLockCachingSource = false;
+      final fileUri = url.startsWith('file://') ? Uri.parse(url) : Uri.file(localCachedFile.path);
+      return AudioSource.uri(fileUri, tag: mediaItem);
     }
 
-    printINFO("Playing Using AudioSource.uri");
+    // 2. Remote stream: use direct AudioSource.uri with dynamic client-matching headers (Echo-Music architecture)
+    final headers = _getMediaHeaders(url);
+    printINFO("Playing using direct AudioSource.uri with client headers: ${headers?['User-Agent']?.split(' ').first}");
     isPlayingUsingLockCachingSource = false;
     return AudioSource.uri(
-      Uri.tryParse(url)!,
+      Uri.parse(url),
       headers: headers,
       tag: mediaItem,
     );
