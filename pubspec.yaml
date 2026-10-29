@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.12.3+28
+version: 1.12.4+29
 
 environment:
   sdk: ">=3.1.5 <4.0.0"
@@ -80,10 +80,8 @@ dependencies:
   url_launcher: ^6.2.1
   widget_marquee: ^0.0.8
   window_manager: ^0.4.2
-  youtube_explode_dart:
-    git:
-      url: https://github.com/anandnet/youtube_explode_dart.git
-      ref: 1d9ec9baa806705b1d859260eeb389ec28c6b024
+  youtube_explode_dart: ^3.1.0
+  youtube_explode_webview: ^0.0.2
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
 
@@ -155,3 +153,4 @@ flutter_launcher_icons:
     generate: true
     image_path: "assets/icons/icon2.png"
   image_path: "assets/icons/icon2.png"
+

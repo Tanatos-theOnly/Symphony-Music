@@ -55,10 +55,78 @@ class StreamProvider {
     return audioList;
   }
 
+  static Future<StreamProvider?> _fetchInvidious(String videoId) async {
+    final instances = [
+      'https://inv.nadeko.net',
+      'https://invidious.nerdvpn.de',
+      'https://invidious.flokinet.to',
+      'https://iv.ggtyler.dev',
+      'https://invidious.no-valis.be',
+    ];
+
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+    try {
+      for (final inst in instances) {
+        try {
+          final req = await client
+              .getUrl(Uri.parse('$inst/api/v1/videos/$videoId'))
+              .timeout(const Duration(seconds: 4));
+          final resp = await req.close().timeout(const Duration(seconds: 4));
+          if (resp.statusCode == 200) {
+            final body = await resp.transform(utf8.decoder).join();
+            final data = jsonDecode(body);
+            final adaptiveFormats = data['adaptiveFormats'] as List? ?? [];
+            final audioList = <Audio>[];
+            for (final f in adaptiveFormats) {
+              final type = f['type']?.toString() ?? '';
+              final url = f['url']?.toString();
+              if (type.contains('audio') && url != null && url.isNotEmpty) {
+                audioList.add(Audio(
+                  itag: int.tryParse(f['itag']?.toString() ?? '0') ?? 0,
+                  audioCodec: type.contains('mp4') ? Codec.mp4a : Codec.opus,
+                  bitrate: int.tryParse(f['bitrate']?.toString() ?? '0') ?? 0,
+                  duration: int.tryParse(f['approxDurationMs']?.toString() ?? '0') ?? 0,
+                  loudnessDb: 0.0,
+                  url: url,
+                  size: int.tryParse(f['clen']?.toString() ?? f['contentLength']?.toString() ?? '0') ?? 0,
+                ));
+              }
+            }
+            if (audioList.isNotEmpty) {
+              return StreamProvider(
+                playable: true,
+                statusMSG: "OK",
+                audioFormats: audioList,
+              );
+            }
+          }
+        } catch (_) {
+          continue;
+        }
+      }
+    } finally {
+      client.close();
+    }
+    return null;
+  }
+
   static Future<StreamProvider> fetch(String videoId) async {
     String lastReason = "Song is unplayable";
 
-    // Tier 1: ANDROID SDK-less client (current InnerTube standard, no PO-Token required)
+    // Tier 1: Invidious Instances (provides valid Proof-of-Origin token and full unthrottled streaming)
+    try {
+      final invidiousResult = await _fetchInvidious(videoId);
+      if (invidiousResult != null && invidiousResult.playable) {
+        return invidiousResult;
+      }
+    } catch (e) {
+      if (e is SocketException) {
+        return StreamProvider(playable: false, statusMSG: "networkError");
+      }
+    }
+
+
+    // Tier 2: ANDROID SDK-less client (InnerTube fallback) (current InnerTube standard, no PO-Token required)
     try {
       final androidData = await _postInnertube(
         'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
@@ -107,7 +175,7 @@ class StreamProvider {
       }
     }
 
-    // Tier 2: IOS mobile client
+    // Tier 3: IOS mobile client (InnerTube fallback)
     try {
       final iosData = await _postInnertube(
         'https://www.youtube.com/youtubei/v1/player?key=AIzaSyB-63vPrdThhKuerbB2N_l7Kwwcxj6yUAc&prettyPrint=false',
@@ -160,7 +228,7 @@ class StreamProvider {
       }
     }
 
-    // Tier 3: YoutubeExplode fallback
+    // Tier 4: YoutubeExplode fallback
     final yt = YoutubeExplode();
     try {
       final res = await yt.videos.streamsClient.getManifest(videoId);
@@ -175,8 +243,8 @@ class StreamProvider {
                     audioCodec:
                         e.audioCodec.contains('mp') ? Codec.mp4a : Codec.opus,
                     bitrate: e.bitrate.bitsPerSecond,
-                    duration: e.duration ?? 0,
-                    loudnessDb: e.loudnessDb,
+                    duration: 0,
+                    loudnessDb: 0.0,
                     url: e.url.toString(),
                     size: e.size.totalBytes))
                 .toList());
@@ -188,7 +256,7 @@ class StreamProvider {
           statusMSG: "networkError",
         );
       } else if (e is VideoUnplayableException) {
-        lastReason = e.reason ?? lastReason;
+        lastReason = e.message;
       } else if (e is VideoRequiresPurchaseException) {
         lastReason = "Song requires purchase";
       } else if (e is VideoUnavailableException) {
