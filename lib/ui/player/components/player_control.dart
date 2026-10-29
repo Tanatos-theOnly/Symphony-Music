@@ -6,6 +6,8 @@ import 'package:widget_marquee/widget_marquee.dart';
 
 import '/ui/player/components/animated_play_button.dart';
 import '../player_controller.dart';
+import '/ui/widgets/liquid_glass.dart';
+import '/ui/utils/theme_controller.dart';
 
 class PlayerControlWidget extends StatelessWidget {
   const PlayerControlWidget({super.key});
@@ -78,14 +80,17 @@ class PlayerControlWidget extends StatelessWidget {
               ),
               SizedBox(
                 width: 45,
-                child: IconButton(
-                    onPressed: playerController.toggleFavourite,
-                    icon: Obx(() => Icon(
-                          playerController.isCurrentSongFav.isFalse
-                              ? Icons.favorite_border
-                              : Icons.favorite,
-                          color: Theme.of(context).textTheme.titleMedium!.color,
-                        ))),
+                child: FlowyButton(
+                  child: IconButton(
+                      onPressed: playerController.toggleFavourite,
+                      icon: Obx(() => Icon(
+                            playerController.isCurrentSongFav.isFalse
+                                ? Icons.favorite_border
+                                : Icons.favorite,
+                            color:
+                                Theme.of(context).textTheme.titleMedium!.color,
+                          ))),
+                ),
               ),
             ],
           ),
@@ -115,50 +120,100 @@ class PlayerControlWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              IconButton(
-                  onPressed: playerController.toggleShuffleMode,
-                  icon: Obx(() => Icon(
-                        Ionicons.shuffle,
-                        color: playerController.isShuffleModeEnabled.value
+              FlowyButton(
+                child: IconButton(
+                    onPressed: playerController.toggleShuffleMode,
+                    icon: Obx(() => Icon(
+                          Ionicons.shuffle,
+                          color: playerController.isShuffleModeEnabled.value
+                              ? Theme.of(context).textTheme.titleLarge!.color
+                              : Theme.of(context)
+                                  .textTheme
+                                  .titleLarge!
+                                  .color!
+                                  .withValues(alpha: 0.2),
+                        ))),
+              ),
+              _previousButton(playerController, context),
+              FlowyButton(
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.25),
+                        Colors.white.withValues(alpha: 0.08),
+                      ],
+                    ),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.32),
+                      width: 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (Get.isRegistered<ThemeController>()
+                                    ? Get.find<ThemeController>()
+                                        .primaryColor
+                                        .value
+                                    : Theme.of(context).primaryColor)
+                                ?.withValues(alpha: 0.35) ??
+                            Colors.white.withValues(alpha: 0.2),
+                        blurRadius: 20,
+                        spreadRadius: -2,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.30),
+                        blurRadius: 14,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: AnimatedPlayButton(
+                      key: Key("playButton"),
+                      iconSize: 36,
+                    ),
+                  ),
+                ),
+              ),
+              _nextButton(playerController, context),
+              Obx(() {
+                return FlowyButton(
+                  child: IconButton(
+                      onPressed: playerController.toggleLoopMode,
+                      icon: Icon(
+                        Icons.all_inclusive,
+                        color: playerController.isLoopModeEnabled.value
                             ? Theme.of(context).textTheme.titleLarge!.color
                             : Theme.of(context)
                                 .textTheme
                                 .titleLarge!
                                 .color!
-                                .withOpacity(0.2),
-                      ))),
-              _previousButton(playerController, context),
-              const CircleAvatar(radius: 35, child: AnimatedPlayButton(key: Key("playButton"),)),
-              _nextButton(playerController, context),
-              Obx(() {
-                return IconButton(
-                    onPressed: playerController.toggleLoopMode,
-                    icon: Icon(
-                      Icons.all_inclusive,
-                      color: playerController.isLoopModeEnabled.value
-                          ? Theme.of(context).textTheme.titleLarge!.color
-                          : Theme.of(context)
-                              .textTheme
-                              .titleLarge!
-                              .color!
-                              .withOpacity(0.2),
-                    ));
+                                .withValues(alpha: 0.2),
+                      )),
+                );
               }),
             ],
           ),
         ]);
   }
 
-
   Widget _previousButton(
       PlayerController playerController, BuildContext context) {
-    return IconButton(
-      icon: Icon(
-        Icons.skip_previous,
-        color: Theme.of(context).textTheme.titleMedium!.color,
+    return FlowyButton(
+      child: IconButton(
+        icon: Icon(
+          Icons.skip_previous,
+          color: Theme.of(context).textTheme.titleMedium!.color,
+        ),
+        iconSize: 32,
+        onPressed: playerController.prev,
       ),
-      iconSize: 30,
-      onPressed: playerController.prev,
     );
   }
 }
@@ -170,14 +225,20 @@ Widget _nextButton(PlayerController playerController, BuildContext context) {
                 playerController.isQueueLoopModeEnabled.isTrue) &&
             (playerController.currentQueue.last.id ==
                 playerController.currentSong.value?.id));
-    return IconButton(
-        icon: Icon(
-          Icons.skip_next,
-          color: isLastSong
-              ? Theme.of(context).textTheme.titleLarge!.color!.withOpacity(0.2)
-              : Theme.of(context).textTheme.titleMedium!.color,
-        ),
-        iconSize: 30,
-        onPressed: isLastSong ? null : playerController.next);
+    return FlowyButton(
+      child: IconButton(
+          icon: Icon(
+            Icons.skip_next,
+            color: isLastSong
+                ? Theme.of(context)
+                    .textTheme
+                    .titleLarge!
+                    .color!
+                    .withValues(alpha: 0.2)
+                : Theme.of(context).textTheme.titleMedium!.color,
+          ),
+          iconSize: 32,
+          onPressed: isLastSong ? null : playerController.next),
+    );
   });
 }

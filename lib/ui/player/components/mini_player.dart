@@ -5,6 +5,8 @@ import 'package:symphonymusic/ui/screens/Settings/settings_screen_controller.dar
 import 'package:ionicons/ionicons.dart';
 import 'package:widget_marquee/widget_marquee.dart';
 
+import '/ui/widgets/liquid_glass.dart';
+import '/ui/utils/theme_controller.dart';
 import '/ui/widgets/lyrics_dialog.dart';
 import '/ui/widgets/song_info_dialog.dart';
 import '/ui/player/player_controller.dart';
@@ -33,25 +35,32 @@ class MiniPlayer extends StatelessWidget {
           child: Container(
             height: playerController.playerPanelMinHeight.value,
             width: size.width,
-            color: Theme.of(context).bottomSheetTheme.backgroundColor,
-            child: Center(
-              child: Column(
-                children: [
-                  !isWideScreen || bottomNavEnabled
-                      ? GetX<PlayerController>(
-                          builder: (controller) => Container(
-                              height: 3,
-                              color: Theme.of(context)
-                                  .progressIndicatorTheme
-                                  .color,
-                              child: MiniPlayerProgressBar(
-                                  progressBarStatus:
-                                      controller.progressBarStatus.value,
-                                  progressBarColor: Theme.of(context)
-                                          .progressIndicatorTheme
-                                          .linearTrackColor ??
-                                      Colors.white)),
-                        )
+            color: Colors.transparent,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            child: LiquidGlassContainer(
+              borderRadius: BorderRadius.circular(22),
+              blurSigma: 20.0,
+              borderWidth: 0.8,
+              padding: EdgeInsets.zero,
+              child: Center(
+                child: Column(
+                  children: [
+                    !isWideScreen || bottomNavEnabled
+                        ? GetX<PlayerController>(
+                            builder: (controller) => ClipRRect(
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                              child: Container(
+                                  height: 2.5,
+                                  color: Colors.white.withValues(alpha: 0.08),
+                                  child: MiniPlayerProgressBar(
+                                      progressBarStatus:
+                                          controller.progressBarStatus.value,
+                                      progressBarColor: Theme.of(context)
+                                              .progressIndicatorTheme
+                                              .linearTrackColor ??
+                                          Colors.white)),
+                            ),
+                          )
                       : GetX<PlayerController>(builder: (controller) {
                           return Padding(
                             padding: const EdgeInsets.only(
@@ -202,29 +211,31 @@ class MiniPlayer extends StatelessWidget {
                                                       .textTheme
                                                       .titleLarge!
                                                       .color!
-                                                      .withOpacity(0.2),
+                                                      .withValues(alpha: 0.2),
                                             ))),
                                   ],
                                 ),
                               if (isWideScreen && !bottomNavEnabled)
                                 SizedBox(
                                     width: 40,
-                                    child: InkWell(
-                                      onTap: (playerController
-                                                  .currentQueue.isEmpty ||
-                                              (playerController
-                                                      .currentQueue.first.id ==
-                                                  playerController
-                                                      .currentSong.value?.id))
-                                          ? null
-                                          : playerController.prev,
-                                      child: Icon(
-                                        Icons.skip_previous,
-                                        color: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium!
-                                            .color,
-                                        size: 35,
+                                    child: FlowyButton(
+                                      child: InkWell(
+                                        onTap: (playerController
+                                                    .currentQueue.isEmpty ||
+                                                (playerController
+                                                        .currentQueue.first.id ==
+                                                    playerController
+                                                        .currentSong.value?.id))
+                                            ? null
+                                            : playerController.prev,
+                                        child: Icon(
+                                          Icons.skip_previous,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium!
+                                              .color,
+                                          size: 35,
+                                        ),
                                       ),
                                     )),
                               isWideScreen && !bottomNavEnabled
@@ -244,8 +255,10 @@ class MiniPlayer extends StatelessWidget {
                                   : SizedBox.square(
                                       dimension: 50,
                                       child: Center(
-                                          child: AnimatedPlayButton(
-                                        iconSize: isWideScreen ? 43 : 35,
+                                          child: FlowyButton(
+                                        child: AnimatedPlayButton(
+                                          iconSize: isWideScreen ? 43 : 35,
+                                        ),
                                       ))),
                               SizedBox(
                                   width: 40,
@@ -262,23 +275,25 @@ class MiniPlayer extends StatelessWidget {
                                                         .currentQueue.last.id ==
                                                     playerController.currentSong
                                                         .value?.id));
-                                    return InkWell(
-                                      onTap: isLastSong
-                                          ? null
-                                          : playerController.next,
-                                      child: Icon(
-                                        Icons.skip_next,
-                                        color: isLastSong
-                                            ? Theme.of(context)
-                                                .textTheme
-                                                .titleLarge!
-                                                .color!
-                                                .withOpacity(0.2)
-                                            : Theme.of(context)
-                                                .textTheme
-                                                .titleMedium!
-                                                .color,
-                                        size: 35,
+                                    return FlowyButton(
+                                      child: InkWell(
+                                        onTap: isLastSong
+                                            ? null
+                                            : playerController.next,
+                                        child: Icon(
+                                          Icons.skip_next,
+                                          color: isLastSong
+                                              ? Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge!
+                                                  .color!
+                                                  .withValues(alpha: 0.2)
+                                              : Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium!
+                                                  .color,
+                                          size: 35,
+                                        ),
                                       ),
                                     );
                                   })),
@@ -301,7 +316,7 @@ class MiniPlayer extends StatelessWidget {
                                                   .textTheme
                                                   .titleLarge!
                                                   .color!
-                                                  .withOpacity(0.2),
+                                                  .withValues(alpha: 0.2),
                                         )),
                                     IconButton(
                                         iconSize: 20,
@@ -502,6 +517,7 @@ class MiniPlayer extends StatelessWidget {
                 ],
               ),
             ),
+          ),
           ),
         ),
       );

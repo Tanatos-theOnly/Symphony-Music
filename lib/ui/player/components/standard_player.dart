@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,6 +9,7 @@ import 'albumart_lyrics.dart';
 import 'backgroud_image.dart';
 import 'lyrics_switch.dart';
 import 'player_control.dart';
+import '/ui/widgets/liquid_glass.dart';
 
 /// Standard player widget
 ///
@@ -35,24 +35,37 @@ class StandardPlayer extends StatelessWidget {
         : playerArtImageSize;
     return Stack(
       children: [
+        /// Liquid Ambient Living Glow Mesh
+        const Positioned.fill(
+          child: LiquidAmbientGlow(intensity: 0.55),
+        ),
+
         /// Stack first child
-        /// Album art image in background covering the whole screen
+        /// Album art image in background covering the whole screen with liquid dispersion
         BackgroudImage(
           key: Key("${playerController.currentSong.value?.id}_background"),
           cacheHeight: 200,
         ),
 
         /// Stack child
-        /// Blur effect on background
+        /// Liquid acrylic blur effect on background
         BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          filter: ImageFilter.blur(sigmaX: 25.0, sigmaY: 25.0),
           child: Stack(
             children: [
-              /// opacity effect on background
+              /// Subtle translucent dark veil to allow ambient glow to refract cleanly
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.8),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.20),
+                        Theme.of(context).primaryColor.withValues(alpha: 0.50),
+                        Colors.black.withValues(alpha: 0.70),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -68,8 +81,8 @@ class StandardPlayer extends StatelessWidget {
                       colors: [
                         Theme.of(context).primaryColor,
                         Theme.of(context).primaryColor,
-                        Theme.of(context).primaryColor.withOpacity(0.4),
-                        Theme.of(context).primaryColor.withOpacity(0),
+                        Theme.of(context).primaryColor.withValues(alpha: 0.4),
+                        Theme.of(context).primaryColor.withValues(alpha: 0),
                       ],
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
@@ -175,12 +188,14 @@ class StandardPlayer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 /// Minimize button
-                IconButton(
-                  icon: const Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 28,
+                FlowyButton(
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 28,
+                    ),
+                    onPressed: playerController.playerPanelController.close,
                   ),
-                  onPressed: playerController.playerPanelController.close,
                 ),
 
                 /// Playing from [Album name]
@@ -208,28 +223,30 @@ class StandardPlayer extends StatelessWidget {
                 ),
 
                 /// More button for current song context
-                IconButton(
-                  icon: const Icon(
-                    Icons.more_vert,
-                    size: 25,
+                FlowyButton(
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.more_vert,
+                      size: 25,
+                    ),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        constraints: const BoxConstraints(maxWidth: 500),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20.0)),
+                        ),
+                        isScrollControlled: true,
+                        context: playerController
+                            .homeScaffoldkey.currentState!.context,
+                        barrierColor: Colors.black.withValues(alpha: 0.5),
+                        builder: (context) => SongInfoBottomSheet(
+                          playerController.currentSong.value!,
+                          calledFromPlayer: true,
+                        ),
+                      ).whenComplete(() => Get.delete<SongInfoController>());
+                    },
                   ),
-                  onPressed: () {
-                    showModalBottomSheet(
-                      constraints: const BoxConstraints(maxWidth: 500),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(10.0)),
-                      ),
-                      isScrollControlled: true,
-                      context: playerController
-                          .homeScaffoldkey.currentState!.context,
-                      barrierColor: Colors.transparent.withAlpha(100),
-                      builder: (context) => SongInfoBottomSheet(
-                        playerController.currentSong.value!,
-                        calledFromPlayer: true,
-                      ),
-                    ).whenComplete(() => Get.delete<SongInfoController>());
-                  },
                 ),
               ],
             ),

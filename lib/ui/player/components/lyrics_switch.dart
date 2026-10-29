@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:symphonymusic/ui/utils/theme_controller.dart';
-import 'package:toggle_switch/toggle_switch.dart';
-
+import '/ui/utils/theme_controller.dart';
+import '/ui/widgets/liquid_glass.dart';
 import '../player_controller.dart';
 
 class LyricsSwitch extends StatelessWidget {
@@ -11,28 +10,98 @@ class LyricsSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final PlayerController playerController = Get.find<PlayerController>();
-    return Obx(
-      () => playerController.showLyricsflag.value
-          ? Padding(
-              padding: const EdgeInsets.only(bottom: 10.0),
-              child: ToggleSwitch(
-                minWidth: 90.0,
-                cornerRadius: 20.0,
-                activeBgColors: [
-                  [Theme.of(context).primaryColor.withLightness(0.4)],
-                  [Theme.of(context).primaryColor.withLightness(0.4)]
-                ],
-                activeFgColor: Colors.white,
-                inactiveBgColor: Theme.of(context).colorScheme.secondary,
-                inactiveFgColor: Colors.white,
-                initialLabelIndex: playerController.lyricsMode.value,
-                totalSwitches: 2,
-                labels: ['synced'.tr, 'plain'.tr],
-                radiusStyle: true,
-                onToggle: playerController.changeLyricsMode,
+    final themeCtrl = Get.isRegistered<ThemeController>()
+        ? Get.find<ThemeController>()
+        : null;
+
+    return Obx(() {
+      if (playerController.showLyricsflag.isFalse) {
+        return const SizedBox.shrink();
+      }
+
+      final activeColor = themeCtrl?.primaryColor.value ??
+          Theme.of(context).colorScheme.primary;
+      final selectedMode = playerController.lyricsMode.value;
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12.0),
+        child: LiquidGlassContainer(
+          borderRadius: BorderRadius.circular(24),
+          blurSigma: 16.0,
+          borderWidth: 0.8,
+          padding: const EdgeInsets.all(3),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildSegment(
+                label: 'synced'.tr,
+                isSelected: selectedMode == 0,
+                activeColor: activeColor,
+                onTap: () => playerController.changeLyricsMode(0),
               ),
-            )
-          : const SizedBox.shrink(),
+              _buildSegment(
+                label: 'plain'.tr,
+                isSelected: selectedMode == 1,
+                activeColor: activeColor,
+                onTap: () => playerController.changeLyricsMode(1),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildSegment({
+    required String label,
+    required bool isSelected,
+    required Color activeColor,
+    required VoidCallback onTap,
+  }) {
+    return FlowyButton(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: isSelected
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    activeColor.withValues(alpha: 0.75),
+                    activeColor.withValues(alpha: 0.50),
+                  ],
+                )
+              : null,
+          border: isSelected
+              ? Border.all(
+                  color: Colors.white.withValues(alpha: 0.28),
+                  width: 0.8,
+                )
+              : Border.all(color: Colors.transparent),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: activeColor.withValues(alpha: 0.35),
+                    blurRadius: 10,
+                    spreadRadius: -1,
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.5,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.65),
+            letterSpacing: 0.3,
+          ),
+        ),
+      ),
     );
   }
 }
