@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:symphonymusic/utils/helper.dart';
 import 'package:symphonymusic/utils/lang_mapping.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../widgets/common_dialog_widget.dart';
 import '../../widgets/cust_switch.dart';
@@ -164,8 +163,11 @@ class SettingsScreen extends StatelessWidget {
                         contentPadding:
                             const EdgeInsets.only(left: 5, right: 10),
                         title: Text("enableBottomNav".tr),
-                        subtitle: Text("enableBottomNavDes".tr,
-                            style: Theme.of(context).textTheme.bodyMedium),
+                        subtitle: Obx(() => Text(
+                            settingsController.isBottomNavBarEnabled.isTrue
+                                ? "Bottom Dock (Standard)".tr
+                                : "Left Side Dock".tr,
+                            style: Theme.of(context).textTheme.bodyMedium)),
                         trailing: Obx(
                           () => CustSwitch(
                               value: settingsController

@@ -15,7 +15,6 @@ import '../../../utils/update_check_flag_file.dart';
 import '/services/piped_service.dart';
 import '../Library/library_controller.dart';
 import '../../widgets/snackbar.dart';
-import '../../../utils/helper.dart';
 import '/services/music_service.dart';
 import '/ui/player/player_controller.dart';
 import '../Home/home_screen_controller.dart';
@@ -168,7 +167,7 @@ class SettingsScreenController extends GetxController {
             ? "zh-CN"
             : appLang;
     isBottomNavBarEnabled.value =
-        isDesktop ? false : (setBox.get("isBottomNavBarEnabled") ?? false);
+        isDesktop ? false : (setBox.get("isBottomNavBarEnabled") ?? true);
     noOfHomeScreenContent.value = setBox.get("noOfHomeScreenContent") ?? 3;
     isTransitionAnimationDisabled.value =
         setBox.get("isTransitionAnimationDisabled") ?? false;
@@ -245,14 +244,28 @@ class SettingsScreenController extends GetxController {
   void enableBottomNavBar(bool val) {
     final homeScrCon = Get.find<HomeScreenController>();
     final playerCon = Get.find<PlayerController>();
+    final currentTab = homeScrCon.tabIndex.value;
+    isBottomNavBarEnabled.value = val;
     if (val) {
-      homeScrCon.onSideBarTabSelected(3);
-      isBottomNavBarEnabled.value = true;
+      if (currentTab == 0) {
+        homeScrCon.tabIndex.value = 0;
+      } else if (currentTab == 5) {
+        homeScrCon.tabIndex.value = 3;
+      } else {
+        homeScrCon.tabIndex.value = 2;
+      }
     } else {
-      isBottomNavBarEnabled.value = false;
-      homeScrCon.onSideBarTabSelected(5);
+      if (currentTab == 0) {
+        homeScrCon.tabIndex.value = 0;
+      } else if (currentTab == 3) {
+        homeScrCon.tabIndex.value = 5;
+      } else if (currentTab == 1) {
+        homeScrCon.tabIndex.value = 0;
+      } else {
+        homeScrCon.tabIndex.value = 1;
+      }
     }
-    if (!Get.find<PlayerController>().initFlagForPlayer) {
+    if (!playerCon.initFlagForPlayer) {
       playerCon.playerPanelMinHeight.value =
           val ? 75.0 : 75.0 + Get.mediaQuery.viewPadding.bottom;
     }

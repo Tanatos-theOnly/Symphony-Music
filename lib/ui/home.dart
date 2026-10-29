@@ -91,6 +91,8 @@ class _HomeState extends State<Home> {
         },
         child: Obx(
           () => Scaffold(
+              extendBody: true,
+              backgroundColor: Colors.transparent,
               bottomNavigationBar: settingsScreenController
                       .isBottomNavBarEnabled.isTrue
                   ? ScrollToHideWidget(
@@ -211,6 +213,9 @@ class _HomeState extends State<Home> {
               drawerScrimColor: Colors.transparent,
               body: Obx(() => SlidingUpPanel(
                     onPanelSlide: playerController.panellistener,
+                    renderPanelSheet: false,
+                    color: Colors.transparent,
+                    boxShadow: const [],
                     controller: playerController.playerPanelController,
                     minHeight: playerController.playerPanelMinHeight.value,
                     maxHeight: size.height,

@@ -1,3 +1,4 @@
+import 'liquid_glass.dart';
 import 'package:audio_service/audio_service.dart' show MediaItem;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -40,15 +41,22 @@ class SongListTile extends StatelessWidget with RemoveSongFromPlaylistMixin {
             //show songinfobotomsheet
             showModalBottomSheet(
               constraints: const BoxConstraints(maxWidth: 500),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
               shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
               ),
               isScrollControlled: true,
               context: playerController.homeScaffoldkey.currentState!.context,
-              barrierColor: Colors.transparent.withAlpha(100),
-              builder: (context) => SongInfoBottomSheet(
-                song,
-                playlist: playlist,
+              barrierColor: Colors.black.withValues(alpha: 0.45),
+              builder: (context) => LiquidGlassContainer(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24.0)),
+                blurSigma: 24,
+                padding: EdgeInsets.zero,
+                child: SongInfoBottomSheet(
+                  song,
+                  playlist: playlist,
+                ),
               ),
             ).whenComplete(() => Get.delete<SongInfoController>());
           }
@@ -113,17 +121,24 @@ class SongListTile extends StatelessWidget with RemoveSongFromPlaylistMixin {
             onLongPress: () async {
               showModalBottomSheet(
                 constraints: const BoxConstraints(maxWidth: 500),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
                 shape: const RoundedRectangleBorder(
                   borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(10.0)),
+                      BorderRadius.vertical(top: Radius.circular(24.0)),
                 ),
                 isScrollControlled: true,
                 context: playerController.homeScaffoldkey.currentState!.context,
-                //constraints: BoxConstraints(maxHeight:Get.height),
-                barrierColor: Colors.transparent.withAlpha(100),
-                builder: (context) => SongInfoBottomSheet(
-                  song,
-                  playlist: playlist,
+                barrierColor: Colors.black.withValues(alpha: 0.45),
+                builder: (context) => LiquidGlassContainer(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(24.0)),
+                  blurSigma: 24,
+                  padding: EdgeInsets.zero,
+                  child: SongInfoBottomSheet(
+                    song,
+                    playlist: playlist,
+                  ),
                 ),
               ).whenComplete(() => Get.delete<SongInfoController>());
             },
