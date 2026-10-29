@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:symphonymusic/ui/screens/Home/home_screen_controller.dart';
@@ -25,155 +26,197 @@ class BottomNavBar extends StatelessWidget {
     return Obx(() {
       final activeColor = themeCtrl?.primaryColor.value ??
           const Color(0xFF4FA5FF);
-      final selectedIndex = homeScreenController.tabIndex.toInt();
+      final selectedIndex =
+          homeScreenController.tabIndex.toInt().clamp(0, tabs.length - 1);
       final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-      return Container(
-        padding: EdgeInsets.only(
-          bottom: bottomPadding > 0 ? bottomPadding : 10,
-          left: 18,
-          right: 18,
-          top: 6,
-        ),
-        color: Colors.transparent,
-        child: SizedBox(
-          height: 68,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              // 1. The Elongated Matte Obsidian Pill Dock Track
-              Container(
-                height: 58,
-                decoration: BoxDecoration(
-                  color: const Color(0xF20B0D12),
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.12),
-                    width: 0.8,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.50),
-                      blurRadius: 22,
-                      offset: const Offset(0, 8),
+      return Align(
+        alignment: Alignment.bottomCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: Container(
+            padding: EdgeInsets.only(
+              bottom: bottomPadding > 0 ? bottomPadding : 10,
+              left: 18,
+              right: 18,
+              top: 6,
+            ),
+            color: Colors.transparent,
+            child: SizedBox(
+              height: 68,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  // 1. The Elongated Matte Obsidian Pill Dock Track
+                  Container(
+                    height: 58,
+                    decoration: BoxDecoration(
+                      color: const Color(0xF20B0D12),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        width: 0.8,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.50),
+                          blurRadius: 22,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
 
-              // 2. The 3D Liquid Glass Pebble Indicator (Fluid Sliding Dome)
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final tabWidth = constraints.maxWidth / tabs.length;
-                  final alignX = -1.0 +
-                      (selectedIndex * (2.0 / (tabs.length - 1)));
+                  // 2. The 3D Liquid Glass Pebble Indicator (Exact Centering & Fluid Sliding)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final totalWidth = constraints.maxWidth;
+                      final tabWidth = totalWidth / tabs.length;
+                      final pebbleWidth = (tabWidth - 4.0).clamp(64.0, 96.0);
+                      const pebbleHeight = 66.0;
+                      final targetLeft = (selectedIndex * tabWidth) +
+                          (tabWidth - pebbleWidth) / 2;
 
-                  return AnimatedAlign(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOutCubic,
-                    alignment: Alignment(alignX, 0.0),
-                    child: SizedBox(
-                      width: tabWidth + 8,
-                      height: 66, // 3D Dome gracefully bulges over the 58px track!
-                      child: LiquidGlassPebble(
-                        borderRadius: BorderRadius.circular(22),
-                        chromaticColor: activeColor,
-                        highlightIntensity: 1.0,
-                        hasDropShadow: true,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 4, vertical: 4),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              tabs[selectedIndex]['activeIcon'] as IconData,
-                              size: 21,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.white.withValues(alpha: 0.60),
-                                  blurRadius: 8,
+                      return AnimatedPositioned(
+                        duration: const Duration(milliseconds: 320),
+                        curve: Curves.easeOutCubic,
+                        left: targetLeft,
+                        top: (68 - pebbleHeight) / 2,
+                        width: pebbleWidth,
+                        height: pebbleHeight,
+                        child: IgnorePointer(
+                          child: LiquidGlassPebble(
+                            borderRadius: BorderRadius.circular(22),
+                            chromaticColor: activeColor,
+                            highlightIntensity: 1.0,
+                            hasDropShadow: true,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 4),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  tabs[selectedIndex]['activeIcon'] as IconData,
+                                  size: 21,
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.60),
+                                      blurRadius: 8,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  modifyNgetlabel(
+                                      tabs[selectedIndex]['label'] as String),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                    letterSpacing: 0.2,
+                                  ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              modifyNgetlabel(
-                                  tabs[selectedIndex]['label'] as String),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              // 3. Tab Touch Zones & Inactive Icons
-              Row(
-                children: List.generate(tabs.length, (index) {
-                  final isSelected = selectedIndex == index;
-                  final tab = tabs[index];
-
-                  return Expanded(
-                    child: FlowyButton(
-                      onTap: () =>
-                          homeScreenController.onBottonBarTabSelected(index),
-                      child: Container(
-                        height: 58,
-                        color: Colors.transparent,
-                        child: AnimatedOpacity(
-                          duration: const Duration(milliseconds: 200),
-                          opacity: isSelected ? 0.0 : 1.0,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                tab['icon'] as IconData,
-                                size: 21,
-                                color: Colors.white.withValues(alpha: 0.50),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                modifyNgetlabel(tab['label'] as String),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white.withValues(alpha: 0.45),
-                                  letterSpacing: 0.2,
-                                ),
-                              ),
-                            ],
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                }),
+                      );
+                    },
+                  ),
+
+                  // 3. Tab Touch Zones & Inactive Icons with Seamless Scrubbing Gesture
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final totalWidth = constraints.maxWidth;
+
+                      return GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onHorizontalDragDown: (details) {
+                          _onHorizontalScrub(details.localPosition.dx, totalWidth,
+                              tabs.length, homeScreenController);
+                        },
+                        onHorizontalDragUpdate: (details) {
+                          _onHorizontalScrub(details.localPosition.dx, totalWidth,
+                              tabs.length, homeScreenController);
+                        },
+                        child: Row(
+                          children: List.generate(tabs.length, (index) {
+                            final isSelected = selectedIndex == index;
+                            final tab = tabs[index];
+
+                            return Expanded(
+                              child: FlowyButton(
+                                onTap: () => homeScreenController
+                                    .onBottonBarTabSelected(index),
+                                child: Container(
+                                  height: 58,
+                                  color: Colors.transparent,
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 200),
+                                    opacity: isSelected ? 0.0 : 1.0,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          tab['icon'] as IconData,
+                                          size: 21,
+                                          color: Colors.white
+                                              .withValues(alpha: 0.50),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          modifyNgetlabel(tab['label'] as String),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w400,
+                                            color: Colors.white
+                                                .withValues(alpha: 0.45),
+                                            letterSpacing: 0.2,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       );
     });
   }
 
+  void _onHorizontalScrub(double localX, double totalWidth, int count,
+      HomeScreenController homeScreenController) {
+    if (totalWidth <= 0 || count <= 0) return;
+    final tabWidth = totalWidth / count;
+    final targetIndex = (localX / tabWidth).floor().clamp(0, count - 1);
+    if (targetIndex != homeScreenController.tabIndex.toInt()) {
+      HapticFeedback.selectionClick();
+      homeScreenController.onBottonBarTabSelected(targetIndex);
+    }
+  }
+
   String modifyNgetlabel(String label) {
     if (label.length > 9) {
-      return "${label.substring(0, 8)}..";
+      return '..';
     }
     return label;
   }

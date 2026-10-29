@@ -140,6 +140,7 @@ class PlayerControlWidget extends StatelessWidget {
                   width: 72,
                   height: 72,
                   child: LiquidGlassPebble(
+                    isCircle: true,
                     borderRadius: BorderRadius.circular(36),
                     chromaticColor: (Get.isRegistered<ThemeController>()
                             ? Get.find<ThemeController>().primaryColor.value

@@ -12,17 +12,20 @@ import '/ui/utils/theme_controller.dart';
 /// - Bottom caustic crescent reflection
 /// - Deep obsidian convex glass body
 /// - 3D floating ambient drop shadow
+/// - Full native spherical mode for circular buttons (zero rectangular artifacts)
 class LiquidGlassPebblePainter extends CustomPainter {
   final Color chromaticColor;
   final double highlightIntensity;
   final BorderRadius borderRadius;
   final bool hasDropShadow;
+  final bool isCircle;
 
   LiquidGlassPebblePainter({
     this.chromaticColor = const Color(0xFF4FA5FF),
     this.highlightIntensity = 1.0,
     this.borderRadius = const BorderRadius.all(Radius.circular(24)),
     this.hasDropShadow = true,
+    this.isCircle = false,
   });
 
   @override
@@ -30,6 +33,165 @@ class LiquidGlassPebblePainter extends CustomPainter {
     if (size.width <= 0 || size.height <= 0) return;
 
     final rect = Offset.zero & size;
+
+    // ==========================================
+    // PURE CIRCULAR 3D SPHERICAL OPTICS
+    // ==========================================
+    if (isCircle) {
+      final center = Offset(size.width * 0.5, size.height * 0.5);
+      final radius = size.width * 0.5;
+
+      // 1. Ambient Depth Shadow
+      if (hasDropShadow) {
+        final shadowPaint = Paint()
+          ..color = Colors.black.withValues(alpha: 0.45)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14);
+        canvas.drawCircle(center + const Offset(0, 6), radius, shadowPaint);
+      }
+
+      // 2. Base Obsidian Glass Sphere Body
+      final bodyPaint = Paint()
+        ..shader = const RadialGradient(
+          center: Alignment(0.0, -0.2),
+          radius: 0.95,
+          colors: [
+            Color(0x35222B38),
+            Color(0x750E121A),
+            Color(0xA006070A),
+          ],
+          stops: [0.0, 0.50, 1.0],
+        ).createShader(rect);
+      canvas.drawCircle(center, radius, bodyPaint);
+
+      canvas.save();
+      canvas.clipPath(Path()..addOval(rect));
+
+      // 3. Top Specular Meniscus Dome Cap (Smooth spherical arc)
+      final topCapPath = Path()
+        ..moveTo(center.dx - radius, center.dy)
+        ..arcTo(rect, -math.pi, math.pi, false)
+        ..quadraticBezierTo(
+            center.dx, center.dy + radius * 0.20, center.dx - radius, center.dy)
+        ..close();
+
+      final topCapPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xFFCAD4DE)
+                .withValues(alpha: 0.85 * highlightIntensity),
+            const Color(0xFF8A98A6)
+                .withValues(alpha: 0.50 * highlightIntensity),
+            const Color(0xFF323B45)
+                .withValues(alpha: 0.12 * highlightIntensity),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.35, 0.75, 1.0],
+        ).createShader(rect);
+      canvas.drawPath(topCapPath, topCapPaint);
+
+      // Top Circular Chromatic Arc
+      final topFringePaint = Paint()
+        ..color = chromaticColor.withValues(alpha: 0.85 * highlightIntensity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.4
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5);
+      canvas.drawArc(rect.deflate(1.5), -math.pi * 0.85, math.pi * 0.70, false,
+          topFringePaint);
+
+      // Top Specular White Rim
+      final topEdgePaint = Paint()
+        ..shader = SweepGradient(
+          center: Alignment.center,
+          startAngle: -math.pi * 0.85,
+          endAngle: -math.pi * 0.15,
+          colors: [
+            Colors.transparent,
+            Colors.white.withValues(alpha: 0.95 * highlightIntensity),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ).createShader(rect)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0;
+      canvas.drawArc(rect.deflate(1.5), -math.pi * 0.85, math.pi * 0.70, false,
+          topEdgePaint);
+
+      // 4. Bottom Caustic Crescent Reflection (Smooth spherical arc)
+      final botCapPath = Path()
+        ..moveTo(center.dx - radius, center.dy)
+        ..arcTo(rect, 0, math.pi, false)
+        ..quadraticBezierTo(
+            center.dx, center.dy + radius * 0.60, center.dx - radius, center.dy)
+        ..close();
+
+      final botCapPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            const Color(0xFFC4D2DF)
+                .withValues(alpha: 0.70 * highlightIntensity),
+            const Color(0xFF6B7B8E)
+                .withValues(alpha: 0.30 * highlightIntensity),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.40, 1.0],
+        ).createShader(rect);
+      canvas.drawPath(botCapPath, botCapPaint);
+
+      // Bottom Circular Chromatic Arc
+      final botFringePaint = Paint()
+        ..color = chromaticColor.withValues(alpha: 0.75 * highlightIntensity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.4
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5);
+      canvas.drawArc(rect.deflate(1.5), math.pi * 0.15, math.pi * 0.70, false,
+          botFringePaint);
+
+      // Bottom Specular White Rim
+      final botEdgePaint = Paint()
+        ..shader = SweepGradient(
+          center: Alignment.center,
+          startAngle: math.pi * 0.15,
+          endAngle: math.pi * 0.85,
+          colors: [
+            Colors.transparent,
+            Colors.white.withValues(alpha: 0.90 * highlightIntensity),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ).createShader(rect)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0;
+      canvas.drawArc(rect.deflate(1.5), math.pi * 0.15, math.pi * 0.70, false,
+          botEdgePaint);
+
+      canvas.restore();
+
+      // 5. Outer Fresnel Circular Rim Border
+      final borderPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white.withValues(alpha: 0.45),
+            Colors.white.withValues(alpha: 0.12),
+            Colors.white.withValues(alpha: 0.08),
+            Colors.white.withValues(alpha: 0.38),
+          ],
+          stops: const [0.0, 0.2, 0.8, 1.0],
+        ).createShader(rect)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8;
+      canvas.drawCircle(center, radius - 0.5, borderPaint);
+      return;
+    }
+
+    // ==========================================
+    // SQUIRCLE / ROUNDED RECTANGLE 3D OPTICS
+    // ==========================================
     final rrect = borderRadius.toRRect(rect);
 
     // 1. Ambient Depth Shadow (gives physical 3D elevation above the dock)
@@ -42,15 +204,15 @@ class LiquidGlassPebblePainter extends CustomPainter {
 
     // 2. Base Obsidian Glass Body (deep convex crystal core)
     final bodyPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
+      ..shader = const RadialGradient(
+        center: Alignment(0.0, -0.25),
+        radius: 0.95,
         colors: [
-          Color(0x351A202A),
-          Color(0x700C0E14),
-          Color(0x9507080B),
+          Color(0x38283444),
+          Color(0x7510141C),
+          Color(0xBA07080B),
         ],
-        stops: [0.0, 0.45, 1.0],
+        stops: [0.0, 0.55, 1.0],
       ).createShader(rect);
     canvas.drawRRect(rrect, bodyPaint);
 
@@ -122,7 +284,8 @@ class LiquidGlassPebblePainter extends CustomPainter {
 
     // 4. Bottom Caustic Crescent Reflection
     final botCapHeight = size.height * 0.26;
-    final botRect = Rect.fromLTWH(0, size.height - botCapHeight, size.width, botCapHeight);
+    final botRect =
+        Rect.fromLTWH(0, size.height - botCapHeight, size.width, botCapHeight);
 
     final botCapPath = Path()
       ..moveTo(0, size.height)
@@ -207,7 +370,8 @@ class LiquidGlassPebblePainter extends CustomPainter {
     return oldDelegate.chromaticColor != chromaticColor ||
         oldDelegate.highlightIntensity != highlightIntensity ||
         oldDelegate.borderRadius != borderRadius ||
-        oldDelegate.hasDropShadow != hasDropShadow;
+        oldDelegate.hasDropShadow != hasDropShadow ||
+        oldDelegate.isCircle != isCircle;
   }
 }
 
@@ -221,6 +385,7 @@ class LiquidGlassPebble extends StatelessWidget {
   final Color? chromaticColor;
   final double highlightIntensity;
   final bool hasDropShadow;
+  final bool isCircle;
   final EdgeInsetsGeometry padding;
 
   const LiquidGlassPebble({
@@ -232,6 +397,7 @@ class LiquidGlassPebble extends StatelessWidget {
     this.chromaticColor,
     this.highlightIntensity = 1.0,
     this.hasDropShadow = true,
+    this.isCircle = false,
     this.padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
   });
 
@@ -252,6 +418,7 @@ class LiquidGlassPebble extends StatelessWidget {
           highlightIntensity: highlightIntensity,
           borderRadius: effectiveRadius,
           hasDropShadow: hasDropShadow,
+          isCircle: isCircle,
         ),
         child: Container(
           width: width,
@@ -266,8 +433,6 @@ class LiquidGlassPebble extends StatelessWidget {
 }
 
 /// Apple iOS 18 style Liquid Glass Container
-/// Crystal-clear acrylic transparency with specular highlight reflection
-/// and chromatic refraction from the background/music theme.
 class LiquidGlassContainer extends StatelessWidget {
   final Widget child;
   final BorderRadius? borderRadius;
@@ -309,16 +474,16 @@ class LiquidGlassContainer extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: effectiveRadius,
         boxShadow: [
-          // Soft liquid ambient shadow
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.28),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
-          // Dynamic chromatic aura matching music theme
           if (glowColor != null || themeCtrl != null)
             BoxShadow(
-              color: (glowColor ?? themeCtrl?.primaryColor.value ?? Colors.transparent)
+              color: (glowColor ??
+                      themeCtrl?.primaryColor.value ??
+                      Colors.transparent)
                   .withValues(alpha: 0.12),
               blurRadius: 32,
               spreadRadius: -4,
@@ -334,7 +499,6 @@ class LiquidGlassContainer extends StatelessWidget {
             padding: padding,
             decoration: BoxDecoration(
               borderRadius: effectiveRadius,
-              // Crystal-clear liquid acrylic base: clear, not milky
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -346,7 +510,6 @@ class LiquidGlassContainer extends StatelessWidget {
                 ],
                 stops: const [0.0, 0.35, 0.70, 1.0],
               ),
-              // Specular wet edge highlight
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.24),
                 width: borderWidth,
@@ -361,7 +524,6 @@ class LiquidGlassContainer extends StatelessWidget {
 }
 
 /// Flowy, organic button with elastic spring squish feedback
-/// Similar to Apple iOS 18 dynamic interactive elements.
 class FlowyButton extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -435,8 +597,6 @@ class _FlowyButtonState extends State<FlowyButton>
       );
     }
 
-    // When onTap is null (e.g. child has its own button/gesture handler),
-    // use Listener with translucent behavior so it animates without stealing gestures.
     return Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: (_) => _onPressDown(),
@@ -451,7 +611,6 @@ class _FlowyButtonState extends State<FlowyButton>
 }
 
 /// Living, breathing ambient mesh glow
-/// Hardware accelerated with RepaintBoundary and smooth orbital animation.
 class LiquidAmbientGlow extends StatefulWidget {
   final double intensity;
 
@@ -540,7 +699,6 @@ class _LiquidGlowPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (size.width <= 0 || size.height <= 0) return;
 
-    // Orb 1: Primary chromatic swell
     final center1 = Offset(size.width * offset1.dx, size.height * offset1.dy);
     final radius1 = size.width * 0.75;
     final paint1 = Paint()
@@ -555,7 +713,6 @@ class _LiquidGlowPainter extends CustomPainter {
 
     canvas.drawCircle(center1, radius1, paint1);
 
-    // Orb 2: Dynamic ambient refraction
     final center2 = Offset(size.width * offset2.dx, size.height * offset2.dy);
     final radius2 = size.width * 0.85;
     final secondaryColor = HSLColor.fromColor(primaryColor)
