@@ -15,10 +15,6 @@ A modern, fast, and open-source music streaming application for Android and Desk
 
 [**Download Latest APK**](https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest) • [**Report an Issue**](https://github.com/Tanatos-theOnly/Symphony-Music/issues) • [**Changelog**](CHANGELOG.md)
 
-<br />
-
-<img src="cover.png" alt="Symphony Music Preview" width="100%" />
-
 </div>
 
 ## Overview
