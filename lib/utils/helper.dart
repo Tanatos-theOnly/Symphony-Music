@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '/ui/navigator.dart';
 import '/ui/widgets/sort_widget.dart';
+import '../services/update_service.dart';
 
 void printERROR(dynamic text, {String tag = "Symphony Music"}) {
   if (kReleaseMode) return;
@@ -161,7 +162,12 @@ void sortArtist(
 
 /// Return true if new version available
 Future<bool> newVersionCheck(String currentVersion) async {
-  return false;
+  try {
+    final result = await UpdateService.checkForUpdates();
+    return result.isUpdateAvailable;
+  } catch (_) {
+    return false;
+  }
 }
 
 String getTimeString(Duration time) {

@@ -54,14 +54,7 @@ class SettingsScreen extends StatelessWidget {
                         child: Material(
                           type: MaterialType.transparency,
                           child: ListTile(
-                            onTap: () {
-                              launchUrl(
-                                Uri.parse(
-                                  'https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest',
-                                ),
-                                mode: LaunchMode.externalApplication,
-                              );
-                            },
+                            onTap: () => settingsController.openUpdateDialog(context),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10)),
                             tileColor: Theme.of(context).colorScheme.secondary,
@@ -670,7 +663,7 @@ class SettingsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "v${settingsController.currentVersion}",
+                          "v${settingsController.currentVersion.value}",
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Theme.of(context)
                                     .textTheme
@@ -706,6 +699,36 @@ class SettingsScreen extends StatelessWidget {
                                     ?.withOpacity(0.5),
                               ),
                         ),
+                        const SizedBox(height: 20),
+                        Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.2)),
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.sync_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          title: const Text("Check for Updates"),
+                          subtitle: Obx(() => Text(
+                                settingsController.isCheckingUpdate.value
+                                    ? "Checking GitHub for releases..."
+                                    : "Version v${settingsController.currentVersion.value}",
+                              )),
+                          trailing: Obx(() => settingsController.isCheckingUpdate.value
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.arrow_forward_ios_rounded, size: 14)),
+                          onTap: () => settingsController.manualCheckForUpdate(context),
+                        ),
                       ],
                     ),
                   ),
@@ -716,7 +739,7 @@ class SettingsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 20.0),
             child: Text(
-              "Symphony v${settingsController.currentVersion}",
+              "Symphony v${settingsController.currentVersion.value}",
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),

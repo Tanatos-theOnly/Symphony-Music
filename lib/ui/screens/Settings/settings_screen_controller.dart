@@ -1,3 +1,6 @@
+import '../../../models/app_update_info.dart';
+import '../../../services/update_service.dart';
+import '../../widgets/update_dialogs.dart';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -47,24 +50,104 @@ class SettingsScreenController extends GetxController {
   final keepScreenAwake = false.obs;
   final restorePlaybackSession = false.obs;
   final cacheHomeScreenData = true.obs;
-  final currentVersion = "M1";
+  final currentVersion = "1.12.2".obs;
+  final isCheckingUpdate = false.obs;
+  AppUpdateInfo? latestUpdateInfo;
 
   @override
   void onInit() {
+    _loadAppVersion();
     _setInitValue();
     if (updateCheckFlag) _checkNewVersion();
     _createInAppSongDownDir();
     super.onInit();
   }
 
-  get currentVision => currentVersion;
+  void _loadAppVersion() async {
+    final v = await UpdateService.getCurrentAppVersion();
+    currentVersion.value = v;
+  }
+
+  get currentVision => currentVersion.value;
   get isCurrentPathsupportDownDir =>
       "$_supportDir/Music" == downloadLocationPath.toString();
   String get supportDirPath => _supportDir;
 
-  _checkNewVersion() {
-    newVersionCheck(currentVersion)
-        .then((value) => isNewVersionAvailable.value = value);
+  _checkNewVersion() async {
+    final result = await UpdateService.checkForUpdates();
+    isNewVersionAvailable.value = result.isUpdateAvailable;
+    latestUpdateInfo = result.updateInfo;
+  }
+
+  Future<void> manualCheckForUpdate(BuildContext context) async {
+    if (isCheckingUpdate.value) return;
+    isCheckingUpdate.value = true;
+
+    try {
+      final result = await UpdateService.checkForUpdates(ignoreSuppressed: true);
+      isCheckingUpdate.value = false;
+
+      if (result.isError) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.errorMessage ?? "Could not check for updates."),
+              action: SnackBarAction(
+                label: "Browser",
+                onPressed: () => UpdateService.openReleasePage(),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      latestUpdateInfo = result.updateInfo;
+      isNewVersionAvailable.value = result.isUpdateAvailable;
+
+      if (result.isUpdateAvailable && result.updateInfo != null) {
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder: (_) => UpdateAvailableDialog(
+              updateInfo: result.updateInfo!,
+              currentVersion: result.currentVersion,
+            ),
+          );
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "You're running the latest version of Symphony Music (v${result.currentVersion})",
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      isCheckingUpdate.value = false;
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error checking for updates: $e")),
+        );
+      }
+    }
+  }
+
+  void openUpdateDialog(BuildContext context) {
+    if (latestUpdateInfo != null) {
+      showDialog(
+        context: context,
+        builder: (_) => UpdateAvailableDialog(
+          updateInfo: latestUpdateInfo!,
+          currentVersion: currentVersion.value,
+        ),
+      );
+    } else {
+      manualCheckForUpdate(context);
+    }
   }
 
   Future<String> _createInAppSongDownDir() async {

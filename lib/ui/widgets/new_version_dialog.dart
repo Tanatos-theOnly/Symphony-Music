@@ -1,79 +1,42 @@
+export 'update_dialogs.dart';
+
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../models/app_update_info.dart';
+import '../../services/update_service.dart';
+import 'update_dialogs.dart';
 
-import '../screens/Home/home_screen_controller.dart';
-import 'common_dialog_widget.dart';
-
+/// Legacy compatibility wrapper for NewVersionDialog
 class NewVersionDialog extends StatelessWidget {
-  const NewVersionDialog({super.key});
+  final AppUpdateInfo? updateInfo;
+  final String? currentVersion;
+
+  const NewVersionDialog({
+    super.key,
+    this.updateInfo,
+    this.currentVersion,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return CommonDialog(
-      child: Container(
-        height: 320,
-        padding: const EdgeInsets.only(top: 40, bottom: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              "newVersionAvailable".tr,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: SizedBox.square(
-                  dimension: 100,
-                  child: FittedBox(
-                    child: FloatingActionButton(
-                      onPressed: () {
-                        launchUrl(
-                          Uri.parse(
-                            'https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest',
-                          ),
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                      child: const Icon(
-                        Icons.download,
-                        size: 30,
-                      ),
-                    ),
-                  ),
-                )),
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GetX<HomeScreenController>(builder: (controller) {
-                    return Checkbox(
-                        value: controller.showVersionDialog.isFalse,
-                        onChanged: (val) {
-                          controller.onChangeVersionVisibility(val ?? false);
-                        },
-                        shape: const CircleBorder());
-                  }),
-                  Text("dontShowInfoAgain".tr)
-                ],
-              ),
-            ),
-            Container(
-                decoration: BoxDecoration(
-                    color: Theme.of(context).textTheme.titleLarge!.color,
-                    borderRadius: BorderRadius.circular(10)),
-                child: InkWell(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 15.0, vertical: 10),
-                    child: Text("dismiss".tr,
-                        style: TextStyle(color: Theme.of(context).canvasColor)),
-                  ),
-                  onTap: () => Navigator.of(context).pop(),
-                ))
-          ],
-        ),
-      ),
+    if (updateInfo != null) {
+      return UpdateAvailableDialog(
+        updateInfo: updateInfo!,
+        currentVersion: currentVersion ?? "1.12.2",
+      );
+    }
+
+    // Fallback if instantiated without updateInfo
+    return FutureBuilder<UpdateCheckResult>(
+      future: UpdateService.checkForUpdates(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data?.updateInfo != null) {
+          return UpdateAvailableDialog(
+            updateInfo: snapshot.data!.updateInfo!,
+            currentVersion: snapshot.data!.currentVersion,
+          );
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 }
