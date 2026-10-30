@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../navigator.dart';
 import 'image_widget.dart';
+import 'liquid_glass.dart';
 
 class ContentListItem extends StatelessWidget {
   const ContentListItem(
@@ -106,12 +107,11 @@ class ContentListItem extends StatelessWidget {
                           ],
                         ),
                       )
-                    : Container(
+                    : LiquidGlassContainer(
                         height: 120,
                         width: 120,
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColorLight,
-                            borderRadius: BorderRadius.circular(10)),
+                        borderRadius: BorderRadius.circular(16),
+                        blurSigma: 16,
                         child: Center(
                             child: Icon(
                           content.playlistId == 'LIBRP'

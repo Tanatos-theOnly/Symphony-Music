@@ -15,6 +15,7 @@ import '/ui/widgets/link_piped.dart';
 import '/services/music_service.dart';
 import '/ui/player/player_controller.dart';
 import '/ui/utils/theme_controller.dart';
+import '/ui/widgets/liquid_glass.dart';
 import 'components/custom_expansion_tile.dart';
 import 'settings_screen_controller.dart';
 
@@ -51,26 +52,29 @@ class SettingsScreen extends StatelessWidget {
                     ? Padding(
                         padding: const EdgeInsets.only(
                             top: 8.0, right: 10, bottom: 8.0),
-                        child: Material(
-                          type: MaterialType.transparency,
-                          child: ListTile(
-                            onTap: () => settingsController.openUpdateDialog(context),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            tileColor: Theme.of(context).colorScheme.secondary,
-                            contentPadding:
-                                const EdgeInsets.only(left: 8, right: 10),
-                            leading:
-                                const CircleAvatar(child: Icon(Icons.download)),
-                            title: Text("newVersionAvailable".tr),
-                            visualDensity: const VisualDensity(horizontal: -2),
-                            subtitle: Text(
-                              "goToDownloadPage".tr,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .copyWith(
-                                      color: Colors.white70, fontSize: 13),
+                        child: LiquidGlassContainer(
+                          borderRadius: BorderRadius.circular(16),
+                          blurSigma: 16,
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: ListTile(
+                              onTap: () => settingsController.openUpdateDialog(context),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)),
+                              contentPadding:
+                                  const EdgeInsets.only(left: 8, right: 10),
+                              leading:
+                                  const CircleAvatar(child: Icon(Icons.download)),
+                              title: Text("newVersionAvailable".tr),
+                              visualDensity: const VisualDensity(horizontal: -2),
+                              subtitle: Text(
+                                "goToDownloadPage".tr,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .copyWith(
+                                        color: Colors.white70, fontSize: 13),
+                              ),
                             ),
                           ),
                         ),

@@ -444,6 +444,7 @@ class LiquidGlassContainer extends StatelessWidget {
   final double? width;
   final double? height;
   final AlignmentGeometry? alignment;
+  final BoxConstraints? constraints;
 
   const LiquidGlassContainer({
     super.key,
@@ -457,6 +458,7 @@ class LiquidGlassContainer extends StatelessWidget {
     this.width,
     this.height,
     this.alignment,
+    this.constraints,
   });
 
   @override
@@ -469,6 +471,7 @@ class LiquidGlassContainer extends StatelessWidget {
     return Container(
       width: width,
       height: height,
+      constraints: constraints,
       margin: margin,
       alignment: alignment,
       decoration: BoxDecoration(

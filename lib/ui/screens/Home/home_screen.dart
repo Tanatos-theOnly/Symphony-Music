@@ -6,6 +6,7 @@ import '/ui/screens/Search/search_screen_controller.dart';
 import '/ui/widgets/animated_screen_transition.dart';
 import '../Library/library_combined.dart';
 import '../../widgets/side_nav_bar.dart';
+import '../../widgets/liquid_glass.dart';
 import '../Library/library.dart';
 import '../Search/search_screen.dart';
 import '../Settings/settings_screen_controller.dart';
@@ -42,32 +43,34 @@ class HomeScreen extends StatelessWidget {
                             ? playerController.playerPanelMinHeight.value -
                                 Get.mediaQuery.padding.bottom
                             : playerController.playerPanelMinHeight.value),
-                    child: SizedBox(
-                      height: 60,
-                      width: 60,
-                      child: FittedBox(
-                        child: FloatingActionButton(
-                            focusElevation: 0,
-                            shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(14))),
-                            elevation: 0,
-                            onPressed: () async {
-                              if (homeScreenController.tabIndex.value == 2) {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) =>
-                                        const CreateNRenamePlaylistPopup());
-                              } else {
-                                Get.toNamed(ScreenNavigationSetup.searchScreen,
-                                    id: ScreenNavigationSetup.id);
-                              }
-                              // file:///data/user/0/com.example.symphonymusic/cache/libCachedImageData/
-                              //file:///data/user/0/com.example.symphonymusic/cache/just_audio_cache/
-                            },
-                            child: Icon(homeScreenController.tabIndex.value == 2
-                                ? Icons.add
-                                : Icons.search)),
+                    child: FlowyButton(
+                      onTap: () async {
+                        if (homeScreenController.tabIndex.value == 2) {
+                          showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  const CreateNRenamePlaylistPopup());
+                        } else {
+                          Get.toNamed(ScreenNavigationSetup.searchScreen,
+                              id: ScreenNavigationSetup.id);
+                        }
+                      },
+                      child: LiquidGlassPebble(
+                        width: 58,
+                        height: 58,
+                        isCircle: true,
+                        borderRadius: BorderRadius.circular(29),
+                        chromaticColor: const Color(0xFF4FA5FF),
+                        highlightIntensity: 1.15,
+                        hasDropShadow: true,
+                        padding: EdgeInsets.zero,
+                        child: Icon(
+                          homeScreenController.tabIndex.value == 2
+                              ? Icons.add
+                              : Icons.search,
+                          color: Colors.white,
+                          size: 26,
+                        ),
                       ),
                     ),
                   ),

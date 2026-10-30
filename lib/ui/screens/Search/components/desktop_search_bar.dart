@@ -5,6 +5,7 @@ import 'search_item.dart';
 import '/ui/screens/Search/search_screen_controller.dart';
 
 import '../../../navigator.dart';
+import '../../../widgets/liquid_glass.dart';
 
 class DesktopSearchBar extends StatelessWidget {
   const DesktopSearchBar({super.key});
@@ -62,10 +63,10 @@ class DesktopSearchBar extends StatelessWidget {
         ),
         Padding(
             padding: const EdgeInsets.only(top: 10.0),
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  borderRadius: BorderRadius.circular(20)),
+            child: LiquidGlassContainer(
+              borderRadius: BorderRadius.circular(20),
+              blurSigma: 24,
+              padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minHeight: 0, maxHeight: 300),
               child: Obx(() {
                 final isHistoryString =

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'components/search_item.dart';
 import '/ui/screens/Settings/settings_screen_controller.dart';
 import '../../widgets/modified_text_field.dart';
+import '../../widgets/liquid_glass.dart';
 import '/ui/navigator.dart';
 import 'search_screen_controller.dart';
 
@@ -29,19 +30,27 @@ class SearchScreen extends StatelessWidget {
                       children: [
                         Padding(
                           padding: EdgeInsets.only(top: topPadding),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.arrow_back_ios_new,
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium!
-                                  .color,
-                            ),
-                            onPressed: () {
+                          child: FlowyButton(
+                            onTap: () {
                               Get.nestedKey(ScreenNavigationSetup.id)!
                                   .currentState!
                                   .pop();
                             },
+                            child: LiquidGlassPebble(
+                              width: 42,
+                              height: 42,
+                              isCircle: true,
+                              borderRadius: BorderRadius.circular(21),
+                              chromaticColor: const Color(0xFF4FA5FF),
+                              highlightIntensity: 1.0,
+                              hasDropShadow: false,
+                              padding: EdgeInsets.zero,
+                              child: const Icon(
+                                Icons.arrow_back_ios_new,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -65,34 +74,46 @@ class SearchScreen extends StatelessWidget {
                     const SizedBox(
                       height: 10,
                     ),
-                    ModifiedTextField(
-                      textCapitalization: TextCapitalization.sentences,
-                      controller: searchScreenController.textInputController,
-                      textInputAction: TextInputAction.search,
-                      onChanged: searchScreenController.onChanged,
-                      onSubmitted: (val) {
-                        if (val.contains("https://")) {
-                          searchScreenController.filterLinks(Uri.parse(val));
-                          searchScreenController.reset();
-                          return;
-                        }
-                        Get.toNamed(ScreenNavigationSetup.searchResultScreen,
-                            id: ScreenNavigationSetup.id, arguments: val);
-                        searchScreenController.addToHistryQueryList(val);
-                      },
-                      autofocus: settingsScreenController
-                          .isBottomNavBarEnabled.isFalse,
-                      cursorColor: Theme.of(context).textTheme.bodySmall!.color,
-                      decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.only(left: 5),
-                          focusColor: Colors.white,
-                          hintText: "searchDes".tr,
-                          suffix: IconButton(
-                            onPressed: searchScreenController.reset,
-                            icon: const Icon(Icons.close),
-                            splashRadius: 16,
-                            iconSize: 19,
-                          )),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 15, bottom: 8),
+                      child: LiquidGlassContainer(
+                        borderRadius: BorderRadius.circular(16),
+                        blurSigma: 16,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                        child: ModifiedTextField(
+                          textCapitalization: TextCapitalization.sentences,
+                          controller: searchScreenController.textInputController,
+                          textInputAction: TextInputAction.search,
+                          onChanged: searchScreenController.onChanged,
+                          onSubmitted: (val) {
+                            if (val.contains("https://")) {
+                              searchScreenController.filterLinks(Uri.parse(val));
+                              searchScreenController.reset();
+                              return;
+                            }
+                            Get.toNamed(ScreenNavigationSetup.searchResultScreen,
+                                id: ScreenNavigationSetup.id, arguments: val);
+                            searchScreenController.addToHistryQueryList(val);
+                          },
+                          autofocus: settingsScreenController
+                              .isBottomNavBarEnabled.isFalse,
+                          cursorColor: Theme.of(context).textTheme.bodySmall!.color,
+                          decoration: InputDecoration(
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              prefixIcon: const Icon(Icons.search, size: 20, color: Colors.white70),
+                              contentPadding: const EdgeInsets.only(left: 5, top: 14),
+                              focusColor: Colors.white,
+                              hintText: "searchDes".tr,
+                              suffix: IconButton(
+                                onPressed: searchScreenController.reset,
+                                icon: const Icon(Icons.close),
+                                splashRadius: 16,
+                                iconSize: 19,
+                              )),
+                        ),
+                      ),
                     ),
                     Expanded(
                       child: Obx(() {

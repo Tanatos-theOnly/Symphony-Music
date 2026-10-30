@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '/ui/player/player_controller.dart';
 import 'snackbar.dart';
+import 'liquid_glass.dart';
 
 class SleepTimerBottomSheet extends StatelessWidget {
   const SleepTimerBottomSheet({super.key});
@@ -24,11 +25,10 @@ class SleepTimerBottomSheet extends StatelessWidget {
             if (playerController.isSleepTimerActive.isTrue)
               SizedBox(
                 height: 90,
-                child: Container(
+                child: LiquidGlassContainer(
                   width: 180,
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary,
-                      borderRadius: BorderRadius.circular(20)),
+                  borderRadius: BorderRadius.circular(20),
+                  blurSigma: 16,
                   child: Align(
                     alignment: Alignment.center,
                     child: Obx(() {
