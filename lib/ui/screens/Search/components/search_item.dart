@@ -14,7 +14,7 @@ class SearchItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final searchScreenController = Get.find<SearchScreenController>();
     return ListTile(
-      contentPadding: const EdgeInsets.only(left: 10, right: 20),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
       onTap: () {
         Get.toNamed(ScreenNavigationSetup.searchResultScreen,
             id: ScreenNavigationSetup.id, arguments: queryString);

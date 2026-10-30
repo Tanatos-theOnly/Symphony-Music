@@ -28,8 +28,9 @@ class SettingsScreen extends StatelessWidget {
     final settingsController = Get.find<SettingsScreenController>();
     final topPadding = context.isLandscape ? 50.0 : 90.0;
     final isDesktop = GetPlatform.isDesktop;
+    final isBottomNav = isBottomNavActive || settingsController.isBottomNavBarEnabled.isTrue;
     return Padding(
-      padding: isBottomNavActive
+      padding: isBottomNav
           ? EdgeInsets.only(left: 20, top: topPadding, right: 15)
           : EdgeInsets.only(top: topPadding, left: 5, right: 5),
       child: Column(
@@ -52,9 +53,25 @@ class SettingsScreen extends StatelessWidget {
                     ? Padding(
                         padding: const EdgeInsets.only(
                             top: 8.0, right: 10, bottom: 8.0),
-                        child: LiquidGlassContainer(
-                          borderRadius: BorderRadius.circular(16),
-                          blurSigma: 16,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0x1FFFFFFF),
+                                Color(0x0AFFFFFF),
+                                Color(0x180D1117),
+                                Color(0x12FFFFFF),
+                              ],
+                              stops: [0.0, 0.35, 0.70, 1.0],
+                            ),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.16),
+                              width: 0.8,
+                            ),
+                          ),
                           child: Material(
                             type: MaterialType.transparency,
                             child: ListTile(

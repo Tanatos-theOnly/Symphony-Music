@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '/ui/widgets/liquid_glass.dart';
 
 class CustomExpansionTile extends StatelessWidget {
   final String title;
@@ -15,10 +14,32 @@ class CustomExpansionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: LiquidGlassContainer(
-        borderRadius: BorderRadius.circular(20),
-        blurSigma: 16,
-        padding: EdgeInsets.zero,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0x1FFFFFFF),
+              Color(0x0AFFFFFF),
+              Color(0x180D1117),
+              Color(0x12FFFFFF),
+            ],
+            stops: [0.0, 0.35, 0.70, 1.0],
+          ),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.16),
+            width: 0.8,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.35),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
         child: Theme(
           data: Theme.of(context).copyWith(
             dividerColor: Colors.transparent,
