@@ -36,7 +36,16 @@ class MiniPlayer extends StatelessWidget {
             height: playerController.playerPanelMinHeight.value,
             width: size.width,
             color: Colors.transparent,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            padding: EdgeInsets.only(
+              left: 10,
+              right: 10,
+              top: 3,
+              bottom: bottomNavEnabled
+                  ? (78.0 + Get.mediaQuery.viewPadding.bottom)
+                  : (Get.mediaQuery.viewPadding.bottom > 0
+                      ? Get.mediaQuery.viewPadding.bottom
+                      : 3.0),
+            ),
             child: LiquidGlassPebble(
               borderRadius: BorderRadius.circular(24),
               chromaticColor: Get.isRegistered<ThemeController>()

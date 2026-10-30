@@ -43,8 +43,11 @@ class HomeScreen extends StatelessWidget {
                                     Get.mediaQuery.padding.bottom
                                 : playerController.playerPanelMinHeight.value) +
                             (settingsScreenController
-                                    .isBottomNavBarEnabled.isTrue
-                                ? 76.0
+                                        .isBottomNavBarEnabled.isTrue &&
+                                    playerController
+                                            .playerPanelMinHeight.value <=
+                                        0
+                                ? 78.0
                                 : 0.0)),
                     child: FlowyButton(
                       onTap: () async {

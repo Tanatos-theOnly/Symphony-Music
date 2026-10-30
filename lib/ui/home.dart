@@ -51,14 +51,15 @@ class _HomeState extends State<Home> {
     final homeScreenController = Get.find<HomeScreenController>();
     final size = MediaQuery.of(context).size;
     final isWideScreen = size.width > 800;
-    if (!playerController.initFlagForPlayer &&
-        settingsScreenController.isBottomNavBarEnabled.isFalse) {
+    if (!playerController.initFlagForPlayer) {
+      final bottomDockSpace =
+          settingsScreenController.isBottomNavBarEnabled.isTrue ? 78.0 : 0.0;
       if (isWideScreen) {
         playerController.playerPanelMinHeight.value =
-            105 + Get.mediaQuery.padding.bottom;
+            105 + bottomDockSpace + Get.mediaQuery.padding.bottom;
       } else {
         playerController.playerPanelMinHeight.value =
-            75 + Get.mediaQuery.padding.bottom;
+            75 + bottomDockSpace + Get.mediaQuery.padding.bottom;
       }
     }
     return PopScope(

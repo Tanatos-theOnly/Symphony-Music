@@ -526,13 +526,11 @@ class PlayerController extends GetxController
 
     if (initFlagForPlayer) {
       final miniPlayerHeight = isWideScreen ? 105.0 : 75.0;
-      if (Get.find<SettingsScreenController>().isBottomNavBarEnabled.isFalse ||
-          getCurrentRouteName() != '/homeScreen') {
-        playerPanelMinHeight.value =
-            miniPlayerHeight + Get.mediaQuery.viewPadding.bottom;
-      } else {
-        playerPanelMinHeight.value = miniPlayerHeight;
-      }
+      final bottomNavEnabled =
+          Get.find<SettingsScreenController>().isBottomNavBarEnabled.isTrue;
+      final bottomDockSpace = bottomNavEnabled ? 78.0 : 0.0;
+      playerPanelMinHeight.value =
+          miniPlayerHeight + bottomDockSpace + Get.mediaQuery.viewPadding.bottom;
       initFlagForPlayer = false;
     }
   }

@@ -379,17 +379,11 @@ class HomeScreenController extends GetxController {
 
       // Set miniplayer height accordingly
       if (!playerCon.initFlagForPlayer) {
-        if (isHomeOnTop) {
-          playerCon.playerPanelMinHeight.value = 75.0;
-        } else {
-          Future.delayed(
-              isResultScreenOnTop
-                  ? const Duration(milliseconds: 300)
-                  : Duration.zero, () {
-            playerCon.playerPanelMinHeight.value =
-                75.0 + Get.mediaQuery.viewPadding.bottom;
-          });
-        }
+        final bottomNavEnabled =
+            Get.find<SettingsScreenController>().isBottomNavBarEnabled.isTrue;
+        final bottomDockSpace = (bottomNavEnabled && isHomeOnTop) ? 78.0 : 0.0;
+        playerCon.playerPanelMinHeight.value =
+            75.0 + bottomDockSpace + Get.mediaQuery.viewPadding.bottom;
       }
     }
   }
