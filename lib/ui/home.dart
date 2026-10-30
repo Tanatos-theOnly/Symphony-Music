@@ -93,10 +93,17 @@ class _HomeState extends State<Home> {
           () => Scaffold(
               bottomNavigationBar: settingsScreenController
                       .isBottomNavBarEnabled.isTrue
-                  ? ScrollToHideWidget(
-                      isVisible: homeScreenController.isHomeSreenOnTop.isTrue &&
-                          playerController.isPanelGTHOpened.isFalse,
-                      child: const BottomNavBar())
+                  ? Theme(
+                      data: Theme.of(context).copyWith(
+                        canvasColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                      ),
+                      child: ScrollToHideWidget(
+                          isVisible: homeScreenController.isHomeSreenOnTop.isTrue &&
+                              playerController.isPanelGTHOpened.isFalse,
+                          child: const BottomNavBar()),
+                    )
                   : null,
               key: playerController.homeScaffoldkey,
               endDrawer: GetPlatform.isDesktop || isWideScreen

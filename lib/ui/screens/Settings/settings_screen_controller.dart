@@ -246,11 +246,19 @@ class SettingsScreenController extends GetxController {
     final homeScrCon = Get.find<HomeScreenController>();
     final playerCon = Get.find<PlayerController>();
     if (val) {
-      homeScrCon.onSideBarTabSelected(3);
+      if (homeScrCon.tabIndex.value == 5) {
+        homeScrCon.onBottonBarTabSelected(3);
+      } else if (homeScrCon.tabIndex.value >= 2 && homeScrCon.tabIndex.value <= 4) {
+        homeScrCon.onBottonBarTabSelected(2);
+      }
       isBottomNavBarEnabled.value = true;
     } else {
+      if (homeScrCon.tabIndex.value == 3) {
+        homeScrCon.onSideBarTabSelected(5);
+      } else if (homeScrCon.tabIndex.value == 2) {
+        homeScrCon.onSideBarTabSelected(2);
+      }
       isBottomNavBarEnabled.value = false;
-      homeScrCon.onSideBarTabSelected(5);
     }
     if (!Get.find<PlayerController>().initFlagForPlayer) {
       playerCon.playerPanelMinHeight.value =

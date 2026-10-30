@@ -33,16 +33,19 @@ class HomeScreen extends StatelessWidget {
         floatingActionButton: Obx(
           () => ((homeScreenController.tabIndex.value == 0 &&
                           !GetPlatform.isDesktop) ||
-                      homeScreenController.tabIndex.value == 2) &&
-                  settingsScreenController.isBottomNavBarEnabled.isFalse
+                      homeScreenController.tabIndex.value == 2)
               ? Obx(
                   () => Padding(
                     padding: EdgeInsets.only(
-                        bottom: playerController.playerPanelMinHeight.value >
-                                Get.mediaQuery.padding.bottom
-                            ? playerController.playerPanelMinHeight.value -
-                                Get.mediaQuery.padding.bottom
-                            : playerController.playerPanelMinHeight.value),
+                        bottom: (playerController.playerPanelMinHeight.value >
+                                    Get.mediaQuery.padding.bottom
+                                ? playerController.playerPanelMinHeight.value -
+                                    Get.mediaQuery.padding.bottom
+                                : playerController.playerPanelMinHeight.value) +
+                            (settingsScreenController
+                                    .isBottomNavBarEnabled.isTrue
+                                ? 76.0
+                                : 0.0)),
                     child: FlowyButton(
                       onTap: () async {
                         if (homeScreenController.tabIndex.value == 2) {
@@ -245,16 +248,14 @@ class Body extends StatelessWidget {
         ),
       );
     } else if (homeScreenController.tabIndex.value == 1) {
-      return settingsScreenController.isBottomNavBarEnabled.isTrue
-          ? const SearchScreen()
-          : const SongsLibraryWidget();
+      return const SongsLibraryWidget();
     } else if (homeScreenController.tabIndex.value == 2) {
       return settingsScreenController.isBottomNavBarEnabled.isTrue
           ? const CombinedLibrary()
           : const PlaylistNAlbumLibraryWidget(isAlbumContent: false);
     } else if (homeScreenController.tabIndex.value == 3) {
       return settingsScreenController.isBottomNavBarEnabled.isTrue
-          ? const CombinedLibrary()
+          ? const SettingsScreen()
           : const PlaylistNAlbumLibraryWidget();
     } else if (homeScreenController.tabIndex.value == 4) {
       return const LibraryArtistWidget();
