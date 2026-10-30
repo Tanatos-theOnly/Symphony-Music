@@ -91,13 +91,16 @@ class _HomeState extends State<Home> {
         },
         child: Obx(
           () => Scaffold(
+              extendBody: settingsScreenController.isBottomNavBarEnabled.isTrue,
               bottomNavigationBar: settingsScreenController
                       .isBottomNavBarEnabled.isTrue
                   ? Theme(
                       data: Theme.of(context).copyWith(
                         canvasColor: Colors.transparent,
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
+                        bottomAppBarTheme: const BottomAppBarThemeData(
+                          color: Colors.transparent,
+                          elevation: 0,
+                        ),
                       ),
                       child: ScrollToHideWidget(
                           isVisible: homeScreenController.isHomeSreenOnTop.isTrue &&
