@@ -8,12 +8,13 @@ A modern, fast, and open-source music streaming application for Android and Desk
 
 [![Release](https://img.shields.io/github/v/release/Tanatos-theOnly/Symphony-Music?style=flat&logo=android&color=blue)](https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-orange?style=flat&logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/rohanslappi)
 [![License](https://img.shields.io/badge/License-GPL_v3.0-green?style=flat)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Windows%20%7C%20Linux-lightgrey?style=flat)]()
 
 <br />
 
-[**Download Latest APK**](https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest) • [**Report an Issue**](https://github.com/Tanatos-theOnly/Symphony-Music/issues) • [**Changelog**](CHANGELOG.md)
+[**Download Latest APK**](https://github.com/Tanatos-theOnly/Symphony-Music/releases/latest) • [**Buy Me a Coffee**](https://buymeacoffee.com/rohanslappi) • [**Report an Issue**](https://github.com/Tanatos-theOnly/Symphony-Music/issues) • [**Changelog**](CHANGELOG.md)
 
 </div>
 
@@ -72,6 +73,18 @@ flutter build apk --release
 
 The compiled APK will be output to:  
 `build/app/outputs/flutter-apk/app-release.apk`
+
+---
+
+## Support the Project
+
+If you love using Symphony Music and want to support its continued development, consider buying me a coffee! ☕
+
+<p align="center">
+  <a href="https://buymeacoffee.com/rohanslappi" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" width="210" />
+  </a>
+</p>
 
 ---
 
