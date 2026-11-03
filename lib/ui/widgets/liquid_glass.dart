@@ -813,3 +813,91 @@ class _LiquidGlowPainter extends CustomPainter {
         oldDelegate.offset2 != offset2;
   }
 }
+
+/// Frosted Liquid Glass Card for list items, tiles, and widgets
+class LiquidGlassCard extends StatelessWidget {
+  final Widget child;
+  final BorderRadius? borderRadius;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final Color? glowColor;
+  final double borderWidth;
+  final bool enableBlur;
+
+  const LiquidGlassCard({
+    super.key,
+    required this.child,
+    this.borderRadius,
+    this.padding,
+    this.margin,
+    this.onTap,
+    this.onLongPress,
+    this.glowColor,
+    this.borderWidth = 0.8,
+    this.enableBlur = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveRadius = borderRadius ?? BorderRadius.circular(16);
+
+    Widget cardContent = Container(
+      padding: padding ?? const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: const Color(0x24141924),
+        borderRadius: effectiveRadius,
+        border: Border.all(
+          color: (glowColor ?? Colors.white).withValues(alpha: 0.14),
+          width: borderWidth,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.22),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+          if (glowColor != null)
+            BoxShadow(
+              color: glowColor!.withValues(alpha: 0.15),
+              blurRadius: 16,
+              spreadRadius: -2,
+            ),
+        ],
+      ),
+      child: child,
+    );
+
+    if (enableBlur) {
+      cardContent = ClipRRect(
+        borderRadius: effectiveRadius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: cardContent,
+        ),
+      );
+    }
+
+    if (onTap != null || onLongPress != null) {
+      return Container(
+        margin: margin,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: effectiveRadius,
+          child: InkWell(
+            borderRadius: effectiveRadius,
+            onTap: onTap,
+            onLongPress: onLongPress,
+            child: cardContent,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      margin: margin,
+      child: cardContent,
+    );
+  }
+}

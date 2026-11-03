@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../navigator.dart';
@@ -36,7 +36,24 @@ class ContentListItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            isAlbum
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.32),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  width: 0.8,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: isAlbum
                 ? ImageWidget(
                     size: 120,
                     album: content,
@@ -124,6 +141,8 @@ class ContentListItem extends StatelessWidget {
                           color: Colors.white,
                           size: 40,
                         ))),
+              ),
+            ),
             const SizedBox(height: 5),
             Expanded(
               child: Column(

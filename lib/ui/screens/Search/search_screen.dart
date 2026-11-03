@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'components/search_item.dart';
@@ -17,6 +17,7 @@ class SearchScreen extends StatelessWidget {
     final settingsScreenController = Get.find<SettingsScreenController>();
     final topPadding = context.isLandscape ? 50.0 : 70.0;
     return Scaffold(
+      backgroundColor: Colors.transparent,
       resizeToAvoidBottomInset: false,
       body: Obx(
         () {

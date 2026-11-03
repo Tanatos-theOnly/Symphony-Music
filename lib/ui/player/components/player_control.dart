@@ -1,4 +1,4 @@
-import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+﻿import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
@@ -78,18 +78,32 @@ class PlayerControlWidget extends StatelessWidget {
                   }),
                 ),
               ),
-              SizedBox(
-                width: 45,
+              SizedBox.square(
+                dimension: 42,
                 child: FlowyButton(
-                  child: IconButton(
-                      onPressed: playerController.toggleFavourite,
-                      icon: Obx(() => Icon(
-                            playerController.isCurrentSongFav.isFalse
-                                ? Icons.favorite_border
-                                : Icons.favorite,
-                            color:
-                                Theme.of(context).textTheme.titleMedium!.color,
-                          ))),
+                  child: LiquidGlassPebble(
+                    isCircle: true,
+                    borderRadius: BorderRadius.circular(21),
+                    chromaticColor: (Get.isRegistered<ThemeController>()
+                            ? Get.find<ThemeController>().primaryColor.value
+                            : null) ??
+                        const Color(0xFF4FA5FF),
+                    highlightIntensity: 0.85,
+                    hasDropShadow: false,
+                    padding: EdgeInsets.zero,
+                    child: Center(
+                      child: IconButton(
+                          onPressed: playerController.toggleFavourite,
+                          iconSize: 20,
+                          icon: Obx(() => Icon(
+                                playerController.isCurrentSongFav.isFalse
+                                    ? Icons.favorite_border
+                                    : Icons.favorite,
+                                color:
+                                    Theme.of(context).textTheme.titleMedium!.color,
+                              ))),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -121,18 +135,35 @@ class PlayerControlWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               FlowyButton(
-                child: IconButton(
-                    onPressed: playerController.toggleShuffleMode,
-                    icon: Obx(() => Icon(
-                          Ionicons.shuffle,
-                          color: playerController.isShuffleModeEnabled.value
-                              ? Theme.of(context).textTheme.titleLarge!.color
-                              : Theme.of(context)
-                                  .textTheme
-                                  .titleLarge!
-                                  .color!
-                                  .withValues(alpha: 0.2),
-                        ))),
+                child: SizedBox.square(
+                  dimension: 42,
+                  child: LiquidGlassPebble(
+                    isCircle: true,
+                    borderRadius: BorderRadius.circular(21),
+                    chromaticColor: (Get.isRegistered<ThemeController>()
+                            ? Get.find<ThemeController>().primaryColor.value
+                            : null) ??
+                        const Color(0xFF4FA5FF),
+                    highlightIntensity: 0.85,
+                    hasDropShadow: false,
+                    padding: EdgeInsets.zero,
+                    child: Center(
+                      child: IconButton(
+                          onPressed: playerController.toggleShuffleMode,
+                          iconSize: 20,
+                          icon: Obx(() => Icon(
+                                Ionicons.shuffle,
+                                color: playerController.isShuffleModeEnabled.value
+                                    ? Theme.of(context).textTheme.titleLarge!.color
+                                    : Theme.of(context)
+                                        .textTheme
+                                        .titleLarge!
+                                        .color!
+                                        .withValues(alpha: 0.2),
+                              ))),
+                    ),
+                  ),
+                ),
               ),
               _previousButton(playerController, context),
               FlowyButton(
@@ -161,18 +192,35 @@ class PlayerControlWidget extends StatelessWidget {
               _nextButton(playerController, context),
               Obx(() {
                 return FlowyButton(
-                  child: IconButton(
-                      onPressed: playerController.toggleLoopMode,
-                      icon: Icon(
-                        Icons.all_inclusive,
-                        color: playerController.isLoopModeEnabled.value
-                            ? Theme.of(context).textTheme.titleLarge!.color
-                            : Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .color!
-                                .withValues(alpha: 0.2),
-                      )),
+                  child: SizedBox.square(
+                    dimension: 42,
+                    child: LiquidGlassPebble(
+                      isCircle: true,
+                      borderRadius: BorderRadius.circular(21),
+                      chromaticColor: (Get.isRegistered<ThemeController>()
+                              ? Get.find<ThemeController>().primaryColor.value
+                              : null) ??
+                          const Color(0xFF4FA5FF),
+                      highlightIntensity: 0.85,
+                      hasDropShadow: false,
+                      padding: EdgeInsets.zero,
+                      child: Center(
+                        child: IconButton(
+                            onPressed: playerController.toggleLoopMode,
+                            iconSize: 20,
+                            icon: Icon(
+                              Icons.all_inclusive,
+                              color: playerController.isLoopModeEnabled.value
+                                  ? Theme.of(context).textTheme.titleLarge!.color
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .color!
+                                      .withValues(alpha: 0.2),
+                            )),
+                      ),
+                    ),
+                  ),
                 );
               }),
             ],
@@ -183,13 +231,29 @@ class PlayerControlWidget extends StatelessWidget {
   Widget _previousButton(
       PlayerController playerController, BuildContext context) {
     return FlowyButton(
-      child: IconButton(
-        icon: Icon(
-          Icons.skip_previous,
-          color: Theme.of(context).textTheme.titleMedium!.color,
+      child: SizedBox.square(
+        dimension: 48,
+        child: LiquidGlassPebble(
+          isCircle: true,
+          borderRadius: BorderRadius.circular(24),
+          chromaticColor: (Get.isRegistered<ThemeController>()
+                  ? Get.find<ThemeController>().primaryColor.value
+                  : null) ??
+              const Color(0xFF4FA5FF),
+          highlightIntensity: 0.90,
+          hasDropShadow: false,
+          padding: EdgeInsets.zero,
+          child: Center(
+            child: IconButton(
+              icon: Icon(
+                Icons.skip_previous,
+                color: Theme.of(context).textTheme.titleMedium!.color,
+              ),
+              iconSize: 28,
+              onPressed: playerController.prev,
+            ),
+          ),
         ),
-        iconSize: 32,
-        onPressed: playerController.prev,
       ),
     );
   }
@@ -203,19 +267,35 @@ Widget _nextButton(PlayerController playerController, BuildContext context) {
             (playerController.currentQueue.last.id ==
                 playerController.currentSong.value?.id));
     return FlowyButton(
-      child: IconButton(
-          icon: Icon(
-            Icons.skip_next,
-            color: isLastSong
-                ? Theme.of(context)
-                    .textTheme
-                    .titleLarge!
-                    .color!
-                    .withValues(alpha: 0.2)
-                : Theme.of(context).textTheme.titleMedium!.color,
+      child: SizedBox.square(
+        dimension: 48,
+        child: LiquidGlassPebble(
+          isCircle: true,
+          borderRadius: BorderRadius.circular(24),
+          chromaticColor: (Get.isRegistered<ThemeController>()
+                  ? Get.find<ThemeController>().primaryColor.value
+                  : null) ??
+              const Color(0xFF4FA5FF),
+          highlightIntensity: 0.90,
+          hasDropShadow: false,
+          padding: EdgeInsets.zero,
+          child: Center(
+            child: IconButton(
+                icon: Icon(
+                  Icons.skip_next,
+                  color: isLastSong
+                      ? Theme.of(context)
+                          .textTheme
+                          .titleLarge!
+                          .color!
+                          .withValues(alpha: 0.2)
+                      : Theme.of(context).textTheme.titleMedium!.color,
+                ),
+                iconSize: 28,
+                onPressed: isLastSong ? null : playerController.next),
           ),
-          iconSize: 32,
-          onPressed: isLastSong ? null : playerController.next),
+        ),
+      ),
     );
   });
 }

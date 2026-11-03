@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../Search/components/desktop_search_bar.dart';
@@ -7,6 +7,7 @@ import '/ui/widgets/animated_screen_transition.dart';
 import '../Library/library_combined.dart';
 import '../../widgets/side_nav_bar.dart';
 import '../../widgets/liquid_glass.dart';
+import '/ui/utils/theme_controller.dart';
 import '../Library/library.dart';
 import '../Search/search_screen.dart';
 import '../Settings/settings_screen_controller.dart';
@@ -30,6 +31,7 @@ class HomeScreen extends StatelessWidget {
         Get.find<SettingsScreenController>();
 
     return Scaffold(
+        backgroundColor: Colors.transparent,
         floatingActionButton: Obx(
           () => ((homeScreenController.tabIndex.value == 0 &&
                           !GetPlatform.isDesktop) ||
@@ -207,6 +209,71 @@ class Body extends StatelessWidget {
                         final items = homeScreenController
                                 .isContentFetched.value
                             ? [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 4.0, right: 20.0, bottom: 18.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "SYMPHONY",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w900,
+                                                  letterSpacing: 1.5,
+                                                  fontSize: 22,
+                                                ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            "Lossless Audio • Liquid Glass Edition",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w500,
+                                              color: (Get.isRegistered<ThemeController>()
+                                                      ? Get.find<ThemeController>()
+                                                          .primaryColor
+                                                          .value
+                                                      : null) ??
+                                                  const Color(0xFF4FA5FF),
+                                              letterSpacing: 0.4,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      LiquidGlassPebble(
+                                        borderRadius:
+                                            BorderRadius.circular(14),
+                                        chromaticColor:
+                                            (Get.isRegistered<ThemeController>()
+                                                    ? Get.find<ThemeController>()
+                                                        .primaryColor
+                                                        .value
+                                                    : null) ??
+                                                const Color(0xFF4FA5FF),
+                                        highlightIntensity: 0.9,
+                                        hasDropShadow: false,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 5),
+                                        child: const Text(
+                                          "96kHz 24-bit",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 Obx(() {
                                   final scrollController = ScrollController();
                                   homeScreenController.contentScrollControllers

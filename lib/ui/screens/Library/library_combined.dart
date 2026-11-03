@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '/ui/screens/Settings/settings_screen_controller.dart';
@@ -15,9 +15,10 @@ class CombinedLibrary extends StatelessWidget {
     final settingscrnController = Get.find<SettingsScreenController>();
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: 85,
-        backgroundColor: Theme.of(context).canvasColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           Obx(() => (settingscrnController.isLinkedWithPiped.isTrue)

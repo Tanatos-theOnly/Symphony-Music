@@ -1,4 +1,4 @@
-import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+﻿import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:symphonymusic/ui/screens/Settings/settings_screen_controller.dart';
@@ -53,6 +53,8 @@ class MiniPlayer extends StatelessWidget {
                   : null,
               highlightIntensity: 1.0,
               hasDropShadow: true,
+              enableBlur: true,
+              blurSigma: 20.0,
               padding: EdgeInsets.zero,
               child: Center(
                 child: Column(

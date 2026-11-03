@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -115,7 +115,7 @@ class ThemeController extends GetxController {
           primaryColorDark: primarySwatch[700],
           //secondaryHeaderColor: primarySwatch[50],
           canvasColor: primarySwatch[700],
-          //scaffoldBackgroundColor: primarySwatch[700],
+          scaffoldBackgroundColor: Colors.transparent,
           bottomSheetTheme: BottomSheetThemeData(
               backgroundColor: primarySwatch[600],
               modalBarrierColor: primarySwatch[400]),
@@ -200,6 +200,7 @@ class ThemeController extends GetxController {
           useMaterial3: false,
           brightness: Brightness.dark,
           canvasColor: Colors.black,
+          scaffoldBackgroundColor: Colors.transparent,
           primaryColor: Colors.black,
           primaryColorDark: Colors.black,
           primaryColorLight: Colors.grey[850],

@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +16,7 @@ import 'widgets/scroll_to_hide.dart';
 import 'widgets/sliding_up_panel.dart';
 import 'widgets/snackbar.dart';
 import 'widgets/up_next_queue.dart';
+import 'widgets/liquid_glass.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -230,7 +231,14 @@ class _HomeState extends State<Home> {
                       playerController.queuePanelController.open();
                     },
                     panel: const Player(),
-                    body: const ScreenNavigation(),
+                    body: const Stack(
+                      children: [
+                        Positioned.fill(
+                          child: LiquidAmbientGlow(intensity: 0.45),
+                        ),
+                        ScreenNavigation(),
+                      ],
+                    ),
                     header: !isWideScreen
                         ? InkWell(
                             onTap: playerController.playerPanelController.open,
