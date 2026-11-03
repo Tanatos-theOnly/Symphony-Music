@@ -91,6 +91,16 @@ class LiquidGlassPebblePainter extends CustomPainter {
         ).createShader(rect);
       canvas.drawPath(topCapPath, topCapPaint);
 
+      // Top Circular Prismatic Violet/Magenta Secondary Dispersion (Dual-Band AGSL Optics)
+      final topVioletFringePaint = Paint()
+        ..color = const Color(0xFF8B5CF6)
+            .withValues(alpha: 0.45 * highlightIntensity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.2);
+      canvas.drawArc(rect.deflate(2.8), -math.pi * 0.82, math.pi * 0.64, false,
+          topVioletFringePaint);
+
       // Top Circular Chromatic Arc
       final topFringePaint = Paint()
         ..color = chromaticColor.withValues(alpha: 0.85 * highlightIntensity)
@@ -140,6 +150,16 @@ class LiquidGlassPebblePainter extends CustomPainter {
           stops: const [0.0, 0.40, 1.0],
         ).createShader(rect);
       canvas.drawPath(botCapPath, botCapPaint);
+
+      // Bottom Circular Prismatic Violet/Magenta Secondary Dispersion
+      final botVioletFringePaint = Paint()
+        ..color = const Color(0xFF8B5CF6)
+            .withValues(alpha: 0.40 * highlightIntensity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.2);
+      canvas.drawArc(rect.deflate(2.8), math.pi * 0.18, math.pi * 0.64, false,
+          botVioletFringePaint);
 
       // Bottom Circular Chromatic Arc
       final botFringePaint = Paint()
@@ -249,6 +269,23 @@ class LiquidGlassPebblePainter extends CustomPainter {
       ).createShader(topRect);
     canvas.drawPath(topCapPath, topCapPaint);
 
+    // Top Secondary Prismatic Violet/Magenta Arc (Inner Spectral Band)
+    final topVioletFringePath = Path()
+      ..moveTo(size.width * 0.12, 2.8)
+      ..quadraticBezierTo(
+        size.width * 0.5,
+        1.6,
+        size.width * 0.88,
+        2.8,
+      );
+    final topVioletFringePaint = Paint()
+      ..color = const Color(0xFF8B5CF6)
+          .withValues(alpha: 0.45 * highlightIntensity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.2);
+    canvas.drawPath(topVioletFringePath, topVioletFringePaint);
+
     // Top Chromatic Dispersion Arc (Electric Cyan / Blue Fringe)
     final topFringePath = Path()
       ..moveTo(size.width * 0.10, 1.5)
@@ -311,6 +348,23 @@ class LiquidGlassPebblePainter extends CustomPainter {
         stops: const [0.0, 0.42, 1.0],
       ).createShader(botRect);
     canvas.drawPath(botCapPath, botCapPaint);
+
+    // Bottom Secondary Prismatic Violet/Magenta Arc
+    final botVioletFringePath = Path()
+      ..moveTo(size.width * 0.14, size.height - 2.8)
+      ..quadraticBezierTo(
+        size.width * 0.5,
+        size.height - 1.6,
+        size.width * 0.86,
+        size.height - 2.8,
+      );
+    final botVioletFringePaint = Paint()
+      ..color = const Color(0xFF8B5CF6)
+          .withValues(alpha: 0.40 * highlightIntensity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.2);
+    canvas.drawPath(botVioletFringePath, botVioletFringePaint);
 
     // Bottom Chromatic Dispersion Arc (Electric Cyan / Blue Fringe)
     final botFringePath = Path()
@@ -386,6 +440,8 @@ class LiquidGlassPebble extends StatelessWidget {
   final double highlightIntensity;
   final bool hasDropShadow;
   final bool isCircle;
+  final bool enableBlur;
+  final double blurSigma;
   final EdgeInsetsGeometry padding;
 
   const LiquidGlassPebble({
@@ -398,6 +454,8 @@ class LiquidGlassPebble extends StatelessWidget {
     this.highlightIntensity = 1.0,
     this.hasDropShadow = true,
     this.isCircle = false,
+    this.enableBlur = false,
+    this.blurSigma = 16.0,
     this.padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
   });
 
@@ -411,6 +469,24 @@ class LiquidGlassPebble extends StatelessWidget {
     final effectiveChromatic = chromaticColor ??
         (themeCtrl?.primaryColor.value ?? const Color(0xFF4FA5FF));
 
+    Widget content = Container(
+      width: width,
+      height: height,
+      padding: padding,
+      alignment: Alignment.center,
+      child: child,
+    );
+
+    if (enableBlur) {
+      content = ClipRRect(
+        borderRadius: isCircle ? BorderRadius.circular(1000) : effectiveRadius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+          child: content,
+        ),
+      );
+    }
+
     return RepaintBoundary(
       child: CustomPaint(
         painter: LiquidGlassPebblePainter(
@@ -420,13 +496,7 @@ class LiquidGlassPebble extends StatelessWidget {
           hasDropShadow: hasDropShadow,
           isCircle: isCircle,
         ),
-        child: Container(
-          width: width,
-          height: height,
-          padding: padding,
-          alignment: Alignment.center,
-          child: child,
-        ),
+        child: content,
       ),
     );
   }

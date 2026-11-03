@@ -265,11 +265,23 @@ class MiniPlayer extends StatelessWidget {
                                         iconSize: isWideScreen ? 43 : 35,
                                       )))
                                   : SizedBox.square(
-                                      dimension: 50,
+                                      dimension: 46,
                                       child: Center(
                                           child: FlowyButton(
-                                        child: AnimatedPlayButton(
-                                          iconSize: isWideScreen ? 43 : 35,
+                                        child: LiquidGlassPebble(
+                                          isCircle: true,
+                                          borderRadius: BorderRadius.circular(23),
+                                          chromaticColor: Get.isRegistered<ThemeController>()
+                                              ? Get.find<ThemeController>().primaryColor.value
+                                              : const Color(0xFF4FA5FF),
+                                          highlightIntensity: 1.15,
+                                          hasDropShadow: false,
+                                          padding: EdgeInsets.zero,
+                                          child: Center(
+                                            child: AnimatedPlayButton(
+                                              iconSize: isWideScreen ? 43 : 33,
+                                            ),
+                                          ),
                                         ),
                                       ))),
                               SizedBox(
